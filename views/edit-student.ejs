@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Student</title>
+</head>
+
+<body>
+
+    <h1>Edit Student</h1>
+
+    <form action="/students/edit/<%= student._id %>" method="POST">
+
+        <label>Name:</label>
+        <input
+            type="text"
+            name="name"
+            value="<%= student.name %>"
+            required
+        >
+        <br><br>
+
+        <label>Age:</label>
+        <input
+            type="number"
+            name="age"
+            value="<%= student.age %>"
+            required
+        >
+        <br><br>
+
+        <label>Course:</label>
+        <input
+            type="text"
+            name="course"
+            value="<%= student.course %>"
+            required
+        >
+        <br><br>
+
+        <label>City:</label>
+        <input
+            type="text"
+            name="city"
+            value="<%= student.city %>"
+            required
+        >
+        <br><br>
+
+        <button type="submit">Update Student</button>
+
+    </form>
+
+    <br>
+
+    <a href="/students">Back to Students</a>
+
+</body>
+</html>
