@@ -10,7 +10,6 @@ const mongoose = require("mongoose");
 // Student Model
 const session = require("express-session");
 
-const Student = require("./models/Student");
 
 console.log("STEP 2: packages loaded");
 
