@@ -8,82 +8,123 @@
 
 <body>
 
+    <div class="dashboard-container">
 
-    <h1>Student Management Dashboard</h1>
-    <a href="/logout" class="logout-btn">🚪 Logout</a>
-    <a href="/students" class="dashboard-btn">
-        📋 Students List
-    </a>
-
-    <div class="dashboard-cards">
-
-        <div class="dashboard-card">
-            <h2>
-                <%= totalStudents %>
-            </h2>
-            <p>Total Students</p>
-        </div>
-
-        <div class="dashboard-card">
-            <h2>
-                <%= totalCourses %>
-            </h2>
-            <p>Total Courses</p>
-        </div>
-
-        <div class="dashboard-card">
-            <h2>
-                <%= totalCities %>
-            </h2>
-            <p>Total Cities</p>
-        </div>
-
-    </div>
-    <h2>Course-wise Students</h2>
-
-    <div class="course-list">
-
-        <% courseCounts.forEach(course=> { %>
-
-            <div class="course-item">
-                <span>
-                    <%= course._id %>
-                </span>
-                <strong>
-                    <%= course.count %>
-                </strong>
+        <div class="dashboard-header">
+            <div>
+                <h1>📊 Student Dashboard</h1>
+                <p>Student Management System</p>
             </div>
 
-            <% }) %>
+            <a href="/logout" class="logout-btn">🚪 Logout</a>
+        </div>
 
-    </div>
-    <h2>City-wise Students</h2>
 
-    <div class="course-list">
+        <!-- Statistics Cards -->
 
-        <% cityCounts.forEach(city=> { %>
+        <div class="dashboard-cards">
 
-            <div class="course-item">
-                <span>
-                    <%= city._id %>
-                </span>
-                <strong>
-                    <%= city.count %>
-                </strong>
+            <div class="dashboard-card">
+                <div class="card-icon">👨‍🎓</div>
+                <h2>
+                    <%= totalStudents %>
+                </h2>
+                <p>Total Students</p>
             </div>
 
-            <% }) %>
 
-    </div>
+            <div class="dashboard-card">
+                <div class="card-icon">📚</div>
+                <h2>
+                    <%= totalCourses %>
+                </h2>
+                <p>Total Courses</p>
+            </div>
 
-    <div class="dashboard-links">
-        <a href="/students" class="dashboard-btn">
-            View Students
-        </a>
 
-        <a href="/students/add" class="dashboard-btn">
-            Add Student
-        </a>
+            <div class="dashboard-card">
+                <div class="card-icon">🏙️</div>
+                <h2>
+                    <%= totalCities %>
+                </h2>
+                <p>Total Cities</p>
+            </div>
+
+        </div>
+
+
+        <!-- Course Statistics -->
+
+        <div class="dashboard-section">
+
+            <h2>📚 Course-wise Students</h2>
+
+            <div class="stats-list">
+
+                <% courseCounts.forEach(course=> { %>
+
+                    <div class="stats-item">
+
+                        <span>
+                            <%= course._id %>
+                        </span>
+
+                        <strong>
+                            <%= course.count %>
+                        </strong>
+
+                    </div>
+
+                    <% }) %>
+
+            </div>
+
+        </div>
+
+
+        <!-- City Statistics -->
+
+        <div class="dashboard-section">
+
+            <h2>🏙️ City-wise Students</h2>
+
+            <div class="stats-list">
+
+                <% cityCounts.forEach(city=> { %>
+
+                    <div class="stats-item">
+
+                        <span>
+                            <%= city._id %>
+                        </span>
+
+                        <strong>
+                            <%= city.count %>
+                        </strong>
+
+                    </div>
+
+                    <% }) %>
+
+            </div>
+
+        </div>
+
+
+        <!-- Navigation -->
+
+        <div class="dashboard-actions">
+
+            <a href="/students" class="dashboard-btn">
+                📋 Students List
+            </a>
+
+            <a href="/students/add" class="dashboard-btn">
+                ➕ Add Student
+            </a>
+
+        </div>
+
     </div>
 
 </body>

@@ -1,7 +1,8 @@
 require("dotenv").config();
 
-console.log("STEP 1: dotenv loaded");
 
+console.log("STEP 1: dotenv loaded");
+const bcrypt = require("bcryptjs");
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -70,13 +71,18 @@ app.get("/login", (req, res) => {
 });
 
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
 
     const { username, password } = req.body;
 
+    const passwordMatch = await bcrypt.compare(
+        password,
+        process.env.ADMIN_PASSWORD_HASH
+    );
+
     if (
         username === process.env.ADMIN_USERNAME &&
-        password === process.env.ADMIN_PASSWORD
+        passwordMatch
     ) {
 
         req.session.isLoggedIn = true;
@@ -90,7 +96,6 @@ app.post("/login", (req, res) => {
     }
 
 });
-
 // ===============================
 // Logout
 // ===============================
