@@ -4,7 +4,10 @@ console.log("STEP 1: dotenv loaded");
 
 const bcrypt = require("bcryptjs");
 const express = require("express");
+
 const mongoose = require("mongoose");
+
+// Student Model
 const session = require("express-session");
 
 const Student = require("./models/Student");
