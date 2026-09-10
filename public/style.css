@@ -742,6 +742,63 @@ th {
 
 }
 
+/* =========================================
+   STUDENT PHOTO
+========================================= */
+
+.student-photo {
+    width: 50px !important;
+    height: 50px !important;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    margin: auto;
+}
+
+/* Photo placeholder */
+.no-photo {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    border-radius: 50%;
+}
+
+
+/* =========================================
+   EDIT PAGE PHOTO
+========================================= */
+
+.edit-student-photo {
+    width: 120px !important;
+    height: 120px !important;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .student-photo {
+        width: 45px !important;
+        height: 45px !important;
+    }
+
+    .no-photo {
+        width: 45px;
+        height: 45px;
+    }
+
+}
+
 
 /* Mobile */
 
