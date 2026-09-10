@@ -89,61 +89,22 @@ app.get("/login", (req, res) => {
 
 });
 
+app.post("/login", (req, res) => {
 
-app.post("/login", async (req, res) => {
+    const { username, password } = req.body;
 
-    try {
+    if (
+        username === process.env.ADMIN_USERNAME &&
+        password === process.env.ADMIN_PASSWORD
+    ) {
 
-        const {
-            username,
-            password
-        } = req.body;
+        req.session.isLoggedIn = true;
 
+        res.redirect("/dashboard");
 
-        if (
-            !process.env.ADMIN_USERNAME ||
-            !process.env.ADMIN_PASSWORD_HASH
-        ) {
+    } else {
 
-            console.log(
-                "Admin login environment variables are missing"
-            );
-
-            return res
-                .status(500)
-                .send("Admin login is not configured");
-
-        }
-
-
-        const passwordMatch = await bcrypt.compare(
-            password,
-            process.env.ADMIN_PASSWORD_HASH
-        );
-
-
-        if (
-            username === process.env.ADMIN_USERNAME &&
-            passwordMatch
-        ) {
-
-            req.session.isLoggedIn = true;
-
-            res.redirect("/dashboard");
-
-        } else {
-
-            res.send("Invalid username or password");
-
-        }
-
-    } catch (error) {
-
-        console.log("Login Error:", error);
-
-        res.status(500).send(
-            "Internal Server Error"
-        );
+        res.send("Invalid username or password");
 
     }
 
