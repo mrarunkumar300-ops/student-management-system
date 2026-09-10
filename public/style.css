@@ -506,6 +506,7 @@ th {
     }
 
 }
+
 /* Add / Edit Student Form */
 
 .form-container {
@@ -569,6 +570,176 @@ th {
 
 .back-btn:hover {
     text-decoration: underline;
+}
+
+/* =========================================
+   STUDENT TABLE RESPONSIVE
+========================================= */
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+}
+
+/* Keep table readable */
+.table-wrapper table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: collapse;
+}
+
+/* Table cells */
+.table-wrapper th,
+.table-wrapper td {
+    padding: 12px 14px;
+    vertical-align: middle;
+}
+
+/* Don't break important data */
+.table-wrapper th {
+    white-space: nowrap;
+}
+
+/* Name */
+.table-wrapper td:nth-child(2) {
+    min-width: 120px;
+}
+
+/* Father name */
+.table-wrapper td:nth-child(3) {
+    min-width: 130px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    .container {
+        width: 95%;
+        margin: 15px auto;
+        padding: 15px;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: 8px;
+    }
+
+    .table-wrapper table {
+        min-width: 1100px;
+    }
+
+    .table-wrapper th,
+    .table-wrapper td {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        width: auto !important;
+        min-width: 70px;
+        padding: 8px 10px !important;
+        margin: 0 !important;
+    }
+
+    /* Search */
+    .search-form {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .search-form input {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .search-form button {
+        width: auto;
+    }
+
+    /* Filter */
+    .filter-form {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .filter-form select {
+        flex: 1;
+        min-width: 160px;
+    }
+
+    .filter-form button,
+    .filter-form .clear-btn {
+        width: auto;
+    }
+
+}
+
+
+/* Extra small mobile */
+@media (max-width: 480px) {
+
+    .container {
+        width: 96%;
+        padding: 10px;
+    }
+
+    .container h1 {
+        font-size: 22px;
+    }
+
+    .dashboard-btn {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .search-form input {
+        width: 100%;
+        min-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .search-form button {
+        width: 100%;
+    }
+
+    .filter-form select {
+        width: 100%;
+        min-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .filter-form button,
+    .filter-form .clear-btn {
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    /* Table stays wide and can be swiped */
+    .table-wrapper table {
+        min-width: 1100px;
+    }
+
 }
 
 
