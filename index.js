@@ -1,7 +1,7 @@
 require("dotenv").config();
 
-
 console.log("STEP 1: dotenv loaded");
+
 const bcrypt = require("bcryptjs");
 const express = require("express");
 const mongoose = require("mongoose");
@@ -15,22 +15,37 @@ const app = express();
 
 console.log("STEP 3: app created");
 
+
+// ===============================
 // Session
+// ===============================
+
 app.use(session({
     secret: "student-management-secret",
     resave: false,
     saveUninitialized: false
 }));
 
+
+// ===============================
+// Middleware
+// ===============================
+
 app.use(express.static("public"));
 
 app.set("view engine", "ejs");
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(express.urlencoded({
+    extended: true
+}));
 
 
-// MongoDB connection
+// ===============================
+// MongoDB Connection
+// ===============================
+
 console.log(
     "STEP 4: MONGO_URI exists:",
     !!process.env.MONGO_URI
@@ -52,9 +67,13 @@ mongoose.connect(process.env.MONGO_URI)
 function isAuthenticated(req, res, next) {
 
     if (req.session.isLoggedIn) {
+
         next();
+
     } else {
+
         res.redirect("/login");
+
     }
 
 }
@@ -73,29 +92,64 @@ app.get("/login", (req, res) => {
 
 app.post("/login", async (req, res) => {
 
-    const { username, password } = req.body;
+    try {
 
-    const passwordMatch = await bcrypt.compare(
-        password,
-        process.env.ADMIN_PASSWORD_HASH
-    );
+        const {
+            username,
+            password
+        } = req.body;
 
-    if (
-        username === process.env.ADMIN_USERNAME &&
-        passwordMatch
-    ) {
 
-        req.session.isLoggedIn = true;
+        if (
+            !process.env.ADMIN_USERNAME ||
+            !process.env.ADMIN_PASSWORD_HASH
+        ) {
 
-        res.redirect("/dashboard");
+            console.log(
+                "Admin login environment variables are missing"
+            );
 
-    } else {
+            return res
+                .status(500)
+                .send("Admin login is not configured");
 
-        res.send("Invalid username or password");
+        }
+
+
+        const passwordMatch = await bcrypt.compare(
+            password,
+            process.env.ADMIN_PASSWORD_HASH
+        );
+
+
+        if (
+            username === process.env.ADMIN_USERNAME &&
+            passwordMatch
+        ) {
+
+            req.session.isLoggedIn = true;
+
+            res.redirect("/dashboard");
+
+        } else {
+
+            res.send("Invalid username or password");
+
+        }
+
+    } catch (error) {
+
+        console.log("Login Error:", error);
+
+        res.status(500).send(
+            "Internal Server Error"
+        );
 
     }
 
 });
+
+
 // ===============================
 // Logout
 // ===============================
@@ -112,82 +166,254 @@ app.get("/logout", (req, res) => {
 
 
 // ===============================
-// Dashboard
+// Helper Function
+// Calculate Student Progress
 // ===============================
 
-app.get("/dashboard", isAuthenticated, async (req, res) => {
+function calculateStudentProgress(student) {
 
-    try {
+    let totalMarks = 0;
 
-        const totalStudents = await Student.countDocuments();
-
-        const courses = await Student.distinct("course");
-
-        const cities = await Student.distinct("city");
+    let obtainedMarks = 0;
 
 
-        // Course-wise count
-        const courseCounts = await Student.aggregate([
+    if (
+        student.exams &&
+        student.exams.length > 0
+    ) {
 
-            {
-                $group: {
-                    _id: "$course",
-                    count: { $sum: 1 }
-                }
-            },
+        student.exams.forEach(exam => {
 
-            {
-                $sort: {
-                    count: -1
-                }
+            if (
+                exam.subjects &&
+                exam.subjects.length > 0
+            ) {
+
+                exam.subjects.forEach(subject => {
+
+                    totalMarks += Number(
+                        subject.totalMarks || 0
+                    );
+
+                    obtainedMarks += Number(
+                        subject.obtainedMarks || 0
+                    );
+
+                });
+
             }
-
-        ]);
-
-
-        // City-wise count
-        const cityCounts = await Student.aggregate([
-
-            {
-                $group: {
-                    _id: "$city",
-                    count: { $sum: 1 }
-                }
-            },
-
-            {
-                $sort: {
-                    count: -1
-                }
-            }
-
-        ]);
-
-
-        res.render("dashboard", {
-
-            totalStudents,
-
-            totalCourses: courses.length,
-
-            totalCities: cities.length,
-
-            courseCounts,
-
-            cityCounts
 
         });
 
+    }
 
-    } catch (error) {
 
-        console.log(error);
+    if (totalMarks === 0) {
 
-        res.send("Error loading dashboard");
+        return 0;
 
     }
 
-});
+
+    return Number(
+        ((obtainedMarks / totalMarks) * 100).toFixed(2)
+    );
+
+}
+
+
+// ===============================
+// Prepare Students with Progress
+// ===============================
+
+function addProgressToStudents(students) {
+
+    return students.map(student => {
+
+        const studentObject =
+            student.toObject
+                ? student.toObject()
+                : student;
+
+        studentObject.progress =
+            calculateStudentProgress(student);
+
+        return studentObject;
+
+    });
+
+}
+
+
+// ===============================
+// Dashboard
+// ===============================
+
+app.get(
+    "/dashboard",
+    isAuthenticated,
+    async (req, res) => {
+
+        try {
+
+            // Total Students
+            const totalStudents =
+                await Student.countDocuments();
+
+
+            // Courses
+            const courses =
+                await Student.distinct("course");
+
+
+            // Addresses
+            const addresses =
+                await Student.distinct("address");
+
+
+            // Course-wise Count
+            const courseCounts =
+                await Student.aggregate([
+
+                    {
+                        $group: {
+
+                            _id: "$course",
+
+                            count: {
+                                $sum: 1
+                            }
+
+                        }
+                    },
+
+                    {
+                        $sort: {
+                            count: -1
+                        }
+                    }
+
+                ]);
+
+
+            // Address-wise Count
+            const addressCounts =
+                await Student.aggregate([
+
+                    {
+                        $group: {
+
+                            _id: "$address",
+
+                            count: {
+                                $sum: 1
+                            }
+
+                        }
+                    },
+
+                    {
+                        $sort: {
+                            count: -1
+                        }
+                    }
+
+                ]);
+
+
+            // Exam-wise Count
+            const examCounts =
+                await Student.aggregate([
+
+                    {
+                        $unwind: "$exams"
+                    },
+
+                    {
+                        $group: {
+
+                            _id: "$exams.examName",
+
+                            count: {
+                                $sum: 1
+                            }
+
+                        }
+                    },
+
+                    {
+                        $sort: {
+                            count: -1
+                        }
+                    }
+
+                ]);
+
+
+            // Average Progress
+            const allStudents =
+                await Student.find();
+
+
+            let totalProgress = 0;
+
+
+            allStudents.forEach(student => {
+
+                totalProgress +=
+                    calculateStudentProgress(student);
+
+            });
+
+
+            let averageProgress = 0;
+
+
+            if (allStudents.length > 0) {
+
+                averageProgress =
+                    Number(
+                        (
+                            totalProgress /
+                            allStudents.length
+                        ).toFixed(2)
+                    );
+
+            }
+
+
+            res.render("dashboard", {
+
+                totalStudents,
+
+                totalCourses:
+                    courses.length,
+
+                totalAddresses:
+                    addresses.length,
+
+                courseCounts,
+
+                addressCounts,
+
+                examCounts,
+
+                averageProgress
+
+            });
+
+        } catch (error) {
+
+            console.log(error);
+
+            res.send(
+                "Error loading dashboard"
+            );
+
+        }
+
+    }
+);
 
 
 // ===============================
@@ -195,7 +421,9 @@ app.get("/dashboard", isAuthenticated, async (req, res) => {
 // ===============================
 
 app.get("/", (req, res) => {
+
     res.redirect("/students");
+
 });
 
 
@@ -207,23 +435,52 @@ app.get("/students", async (req, res) => {
 
     try {
 
-        const search = req.query.search || "";
+        const search =
+            req.query.search || "";
 
-        const course = req.query.course || "";
 
-        const city = req.query.city || "";
+        const course =
+            req.query.course || "";
+
+
+        const address =
+            req.query.address || "";
 
 
         const filter = {};
 
 
+        // ===============================
         // Search
+        // ===============================
+
         if (search) {
 
             filter.$or = [
 
                 {
                     name: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+
+                {
+                    fatherName: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+
+                {
+                    mobile: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+
+                {
+                    email: {
                         $regex: search,
                         $options: "i"
                     }
@@ -237,7 +494,7 @@ app.get("/students", async (req, res) => {
                 },
 
                 {
-                    city: {
+                    address: {
                         $regex: search,
                         $options: "i"
                     }
@@ -248,7 +505,10 @@ app.get("/students", async (req, res) => {
         }
 
 
-        // Course filter
+        // ===============================
+        // Course Filter
+        // ===============================
+
         if (course) {
 
             filter.course = course;
@@ -256,43 +516,65 @@ app.get("/students", async (req, res) => {
         }
 
 
-        // City filter
-        if (city) {
+        // ===============================
+        // Address Filter
+        // ===============================
 
-            filter.city = city;
+        if (address) {
+
+            filter.address = address;
 
         }
 
 
-        const students = await Student.find(filter);
+        // ===============================
+        // Get Students
+        // ===============================
 
-        const courses = await Student.distinct("course");
+        const students =
+            await Student.find(filter);
 
-        const cities = await Student.distinct("city");
+
+        const studentsWithProgress =
+            addProgressToStudents(students);
+
+
+        // Courses
+        const courses =
+            await Student.distinct("course");
+
+
+        // Addresses
+        const addresses =
+            await Student.distinct("address");
 
 
         res.render("students", {
 
-            students,
+            students:
+                studentsWithProgress,
 
             search,
 
             courses,
 
-            cities,
+            addresses,
 
-            selectedCourse: course,
+            selectedCourse:
+                course,
 
-            selectedCity: city
+            selectedAddress:
+                address
 
         });
-
 
     } catch (error) {
 
         console.log(error);
 
-        res.send("Error loading students");
+        res.send(
+            "Error loading students"
+        );
 
     }
 
@@ -303,344 +585,824 @@ app.get("/students", async (req, res) => {
 // Add Student Page
 // ===============================
 
-app.get("/students/add", isAuthenticated, (req, res) => {
+app.get(
+    "/students/add",
+    isAuthenticated,
+    (req, res) => {
 
-    res.render("add-student");
+        res.render("add-student");
 
-});
+    }
+);
 
 
 // ===============================
 // Add Student
 // ===============================
 
-app.post("/students", isAuthenticated, async (req, res) => {
+// ===============================
+// Add Student
+// ===============================
 
-    try {
+app.post(
+    "/students",
+    isAuthenticated,
+    async (req, res) => {
 
-        const {
-            name,
-            age,
-            course,
-            city
-        } = req.body;
+        try {
+
+            const {
+                name,
+                fatherName,
+                mobile,
+                email,
+                photo,
+                age,
+                course,
+                address,
+                exams
+            } = req.body;
 
 
-        if (!name || !age || !course || !city) {
+            // ===============================
+            // Basic Validation
+            // ===============================
 
-            return res.send("Please fill all fields");
+            if (
+                !name ||
+                !fatherName ||
+                !mobile ||
+                !email ||
+                !age ||
+                !course ||
+                !address
+            ) {
+                return res.send(
+                    "Please fill all required fields"
+                );
+            }
+
+
+            // ===============================
+            // Age Validation
+            // ===============================
+
+            if (
+                Number(age) < 1 ||
+                Number(age) > 100
+            ) {
+                return res.send(
+                    "Please enter a valid age"
+                );
+            }
+
+
+            // ===============================
+            // Mobile Validation
+            // ===============================
+
+            if (!/^[0-9]{10}$/.test(mobile)) {
+                return res.send(
+                    "Please enter a valid 10 digit mobile number"
+                );
+            }
+
+
+            // ===============================
+            // Prepare Exams
+            // ===============================
+
+            let formattedExams = [];
+
+
+            if (exams) {
+
+                // Multiple exams
+                const examArray =
+                    Array.isArray(exams)
+                        ? exams
+                        : [exams];
+
+
+                examArray.forEach(exam => {
+
+                    // Empty exam skip
+                    if (!exam.examName) {
+                        return;
+                    }
+
+
+                    let subjects = [];
+
+
+                    if (exam.subjects) {
+
+                        // Multiple subjects
+                        const subjectArray =
+                            Array.isArray(exam.subjects)
+                                ? exam.subjects
+                                : [exam.subjects];
+
+
+                        subjectArray.forEach(subject => {
+
+                            // Empty subject skip
+                            if (!subject.subjectName) {
+                                return;
+                            }
+
+
+                            const totalMarks =
+                                Number(subject.totalMarks);
+
+                            const obtainedMarks =
+                                Number(subject.obtainedMarks);
+
+
+                            // ===============================
+                            // Total Marks Validation
+                            // ===============================
+
+                            if (totalMarks <= 0) {
+
+                                throw new Error(
+                                    "Total marks must be greater than 0"
+                                );
+
+                            }
+
+
+                            // ===============================
+                            // Obtained Marks Validation
+                            // ===============================
+
+                            if (
+                                obtainedMarks < 0 ||
+                                obtainedMarks > totalMarks
+                            ) {
+
+                                throw new Error(
+                                    "Obtained marks must be between 0 and total marks"
+                                );
+
+                            }
+
+
+                            subjects.push({
+
+                                subjectName:
+                                    subject.subjectName,
+
+                                totalMarks,
+
+                                obtainedMarks
+
+                            });
+
+                        });
+
+                    }
+
+
+                    // ===============================
+                    // Save Exam
+                    // ===============================
+
+                    if (subjects.length > 0) {
+
+                        formattedExams.push({
+
+                            examName:
+                                exam.examName,
+
+                            subjects
+
+                        });
+
+                    }
+
+                });
+
+            }
+
+
+            // ===============================
+            // Create Student
+            // ===============================
+
+            await Student.create({
+
+                name,
+
+                fatherName,
+
+                mobile,
+
+                email,
+
+                photo: photo || "",
+
+                age: Number(age),
+
+                course,
+
+                address,
+
+                exams: formattedExams
+
+            });
+
+
+            // ===============================
+            // Redirect
+            // ===============================
+
+            res.redirect("/students");
+
+
+        } catch (error) {
+
+            console.log(
+                "Error adding student:",
+                error
+            );
+
+            res.status(500).send(
+                "Error adding student: " +
+                error.message
+            );
 
         }
-
-
-        if (age < 1 || age > 100) {
-
-            return res.send("Please enter a valid age");
-
-        }
-
-
-        await Student.create({
-
-            name,
-
-            age,
-
-            course,
-
-            city
-
-        });
-
-
-        res.redirect("/students");
-
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.send("Error adding student");
 
     }
-
-});
+);
 
 
 // ===============================
 // Edit Student Page
 // ===============================
 
-app.get("/students/edit/:id", isAuthenticated, async (req, res) => {
+app.get(
+    "/students/edit/:id",
+    isAuthenticated,
+    async (req, res) => {
 
-    try {
+        try {
 
-        const student = await Student.findById(req.params.id);
+            const student =
+                await Student.findById(
+                    req.params.id
+                );
 
 
-        if (!student) {
+            if (!student) {
 
-            return res.status(404).send("Student not found");
+                return res
+                    .status(404)
+                    .send("Student not found");
+
+            }
+
+
+            res.render(
+                "edit-student",
+                {
+                    student
+                }
+            );
+
+        } catch (error) {
+
+            console.log(error);
+
+            res.status(500).send(
+                "Error: " + error.message
+            );
 
         }
 
-
-        res.render("edit-student", {
-
-            student: student
-
-        });
-
-
-    } catch (error) {
-
-        res.status(500).send(
-            "Error: " + error.message
-        );
-
     }
-
-});
+);
 
 
 // ===============================
 // Edit Student
 // ===============================
 
-app.post("/students/edit/:id", isAuthenticated, async (req, res) => {
+// ===============================
+// Edit Student
+// ===============================
 
-    try {
+app.post(
+    "/students/edit/:id",
+    isAuthenticated,
+    async (req, res) => {
 
-        const {
-            name,
-            age,
-            course,
-            city
-        } = req.body;
+        try {
 
-
-        if (!name || !age || !course || !city) {
-
-            return res.send("Please fill all fields");
-
-        }
-
-
-        if (age < 1 || age > 100) {
-
-            return res.send("Please enter a valid age");
-
-        }
-
-
-        await Student.findByIdAndUpdate(
-
-            req.params.id,
-
-            {
+            const {
                 name,
+                fatherName,
+                mobile,
+                email,
+                photo,
                 age,
                 course,
-                city
+                address,
+                exams
+            } = req.body;
+
+
+            // ===============================
+            // Basic Validation
+            // ===============================
+
+            if (
+                !name ||
+                !fatherName ||
+                !mobile ||
+                !email ||
+                !age ||
+                !course ||
+                !address
+            ) {
+
+                return res.send(
+                    "Please fill all required fields"
+                );
+
             }
 
-        );
+
+            // ===============================
+            // Age Validation
+            // ===============================
+
+            if (
+                Number(age) < 1 ||
+                Number(age) > 100
+            ) {
+
+                return res.send(
+                    "Please enter a valid age"
+                );
+
+            }
 
 
-        res.redirect("/students");
+            // ===============================
+            // Mobile Validation
+            // ===============================
+
+            if (
+                !/^[0-9]{10}$/.test(mobile)
+            ) {
+
+                return res.send(
+                    "Please enter a valid 10 digit mobile number"
+                );
+
+            }
 
 
-    } catch (error) {
+            // ===============================
+            // Prepare Exams
+            // ===============================
 
-        console.log(error);
+            let formattedExams = [];
 
-        res.send("Error updating student");
+
+            if (exams) {
+
+                // If only one exam is submitted
+                // convert it into an array
+
+                const examArray =
+                    Array.isArray(exams)
+                        ? exams
+                        : [exams];
+
+
+                examArray.forEach(exam => {
+
+                    if (
+                        !exam.examName
+                    ) {
+                        return;
+                    }
+
+
+                    let subjects = [];
+
+
+                    if (exam.subjects) {
+
+                        const subjectArray =
+                            Array.isArray(
+                                exam.subjects
+                            )
+                                ? exam.subjects
+                                : [exam.subjects];
+
+
+                        subjectArray.forEach(subject => {
+
+                            if (
+                                !subject.subjectName
+                            ) {
+                                return;
+                            }
+
+
+                            const totalMarks =
+                                Number(
+                                    subject.totalMarks
+                                );
+
+
+                            const obtainedMarks =
+                                Number(
+                                    subject.obtainedMarks
+                                );
+
+
+                            // Total marks validation
+
+                            if (
+                                totalMarks <= 0
+                            ) {
+
+                                throw new Error(
+                                    "Total marks must be greater than 0"
+                                );
+
+                            }
+
+
+                            // Obtained marks validation
+
+                            if (
+                                obtainedMarks < 0 ||
+                                obtainedMarks > totalMarks
+                            ) {
+
+                                throw new Error(
+                                    "Obtained marks must be between 0 and total marks"
+                                );
+
+                            }
+
+
+                            subjects.push({
+
+                                subjectName:
+                                    subject.subjectName,
+
+                                totalMarks,
+
+                                obtainedMarks
+
+                            });
+
+                        });
+
+                    }
+
+
+                    // Only save exam if it has subjects
+
+                    if (
+                        subjects.length > 0
+                    ) {
+
+                        formattedExams.push({
+
+                            examName:
+                                exam.examName,
+
+                            subjects
+
+                        });
+
+                    }
+
+                });
+
+            }
+
+
+            // ===============================
+            // Update Student
+            // ===============================
+
+            await Student.findByIdAndUpdate(
+
+                req.params.id,
+
+                {
+
+                    name,
+
+                    fatherName,
+
+                    mobile,
+
+                    email,
+
+                    photo: photo || "",
+
+                    age: Number(age),
+
+                    course,
+
+                    address,
+
+                    exams: formattedExams
+
+                },
+
+                {
+
+                    new: true,
+
+                    runValidators: true
+
+                }
+
+            );
+
+
+            // ===============================
+            // Redirect
+            // ===============================
+
+            res.redirect("/students");
+
+
+        } catch (error) {
+
+            console.log(
+                "Error updating student:",
+                error
+            );
+
+
+            res.status(500).send(
+                "Error updating student: " +
+                error.message
+            );
+
+        }
 
     }
-
-});
+);
 
 
 // ===============================
 // Delete Student
 // ===============================
 
-app.post("/students/delete/:id", isAuthenticated, async (req, res) => {
+app.post(
+    "/students/delete/:id",
+    isAuthenticated,
+    async (req, res) => {
 
-    try {
+        try {
 
-        await Student.findByIdAndDelete(req.params.id);
+            await Student.findByIdAndDelete(
+                req.params.id
+            );
 
-        res.redirect("/students");
 
+            res.redirect("/students");
 
-    } catch (error) {
+        } catch (error) {
 
-        res.status(500).send(
-            "Error: " + error.message
-        );
+            console.log(error);
+
+            res.status(500).send(
+                "Error deleting student"
+            );
+
+        }
 
     }
-
-});
+);
 
 
 // ===============================
 // Get Student API
 // ===============================
 
-app.get("/students/:id", async (req, res) => {
+app.get(
+    "/students/:id",
+    async (req, res) => {
 
-    try {
+        try {
 
-        const student = await Student.findById(
-            req.params.id
-        );
+            const student =
+                await Student.findById(
+                    req.params.id
+                );
 
 
-        if (!student) {
+            if (!student) {
 
-            return res.status(404).json({
+                return res
+                    .status(404)
+                    .json({
 
-                message: "Student not found"
+                        message:
+                            "Student not found"
+
+                    });
+
+            }
+
+
+            const studentData =
+                student.toObject();
+
+
+            studentData.progress =
+                calculateStudentProgress(
+                    student
+                );
+
+
+            res.json(studentData);
+
+        } catch (error) {
+
+            res.status(500).json({
+
+                message:
+                    "Invalid student ID",
+
+                error:
+                    error.message
 
             });
 
         }
 
-
-        res.json(student);
-
-
-    } catch (error) {
-
-        res.status(500).json({
-
-            message: "Invalid student ID",
-
-            error: error.message
-
-        });
-
     }
-
-});
+);
 
 
 // ===============================
 // Update Student API
 // ===============================
 
-app.put("/students/:id", isAuthenticated, async (req, res) => {
+app.put(
+    "/students/:id",
+    isAuthenticated,
+    async (req, res) => {
 
-    try {
+        try {
 
-        const student =
-            await Student.findByIdAndUpdate(
+            const student =
+                await Student.findByIdAndUpdate(
 
-                req.params.id,
+                    req.params.id,
 
-                req.body,
+                    req.body,
 
-                {
-                    new: true
-                }
+                    {
+                        new: true,
+                        runValidators: true
+                    }
 
-            );
+                );
 
 
-        if (!student) {
+            if (!student) {
 
-            return res.status(404).json({
+                return res
+                    .status(404)
+                    .json({
 
-                message: "Student not found"
+                        message:
+                            "Student not found"
+
+                    });
+
+            }
+
+
+            const studentData =
+                student.toObject();
+
+
+            studentData.progress =
+                calculateStudentProgress(
+                    student
+                );
+
+
+            res.json({
+
+                message:
+                    "Student updated successfully",
+
+                student:
+                    studentData
+
+            });
+
+        } catch (error) {
+
+            res.status(500).json({
+
+                message:
+                    "Error",
+
+                error:
+                    error.message
 
             });
 
         }
 
-
-        res.json({
-
-            message: "Student updated successfully",
-
-            student: student
-
-        });
-
-
-    } catch (error) {
-
-        res.status(500).json({
-
-            message: "Error",
-
-            error: error.message
-
-        });
-
     }
-
-});
+);
 
 
 // ===============================
 // Delete Student API
 // ===============================
 
-app.delete("/students/:id", isAuthenticated, async (req, res) => {
+app.delete(
+    "/students/:id",
+    isAuthenticated,
+    async (req, res) => {
 
-    try {
+        try {
 
-        const student =
-            await Student.findByIdAndDelete(
-                req.params.id
-            );
+            const student =
+                await Student.findByIdAndDelete(
+                    req.params.id
+                );
 
 
-        if (!student) {
+            if (!student) {
 
-            return res.status(404).json({
+                return res
+                    .status(404)
+                    .json({
 
-                message: "Student not found"
+                        message:
+                            "Student not found"
+
+                    });
+
+            }
+
+
+            res.json({
+
+                message:
+                    "Student deleted successfully",
+
+                student:
+                    student
+
+            });
+
+        } catch (error) {
+
+            res.status(500).json({
+
+                message:
+                    "Error",
+
+                error:
+                    error.message
 
             });
 
         }
 
-
-        res.json({
-
-            message: "Student deleted successfully",
-
-            student: student
-
-        });
-
-
-    } catch (error) {
-
-        res.status(500).json({
-
-            message: "Error",
-
-            error: error.message
-
-        });
-
     }
-
-});
+);
 
 
 // ===============================
 // Server
 // ===============================
 
-console.log("STEP 5: starting server");
+console.log(
+    "STEP 5: starting server"
+);
 
-app.listen(process.env.PORT || 3000, () => {
 
-    console.log("Server started");
+app.listen(
+    process.env.PORT || 3000,
+    () => {
 
-});
+        console.log(
+            "Server started"
+        );
+
+    }
+);

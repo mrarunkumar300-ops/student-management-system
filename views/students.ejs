@@ -2,120 +2,405 @@
 <html>
 
 <head>
+
     <title>Student Management</title>
+
     <link rel="stylesheet" href="/style.css">
+
 </head>
+
 
 <body>
 
     <div class="container">
 
-        <h1>🎓 Student Management System</h1>
+        <h1>
+            🎓 Student Management System
+        </h1>
+
+
+        <!-- Dashboard -->
+
         <a href="/dashboard" class="dashboard-btn">
             📊 Dashboard
         </a>
+
+
+        <!-- Add Student -->
 
         <a href="/students/add" class="dashboard-btn">
             ➕ Add Student
         </a>
 
-   
+
+        <!-- Search -->
+
         <form action="/students" method="GET" class="search-form">
+
             <input type="text" name="search" placeholder="Search student..." value="<%= search %>">
 
-            <button type="submit">Search</button>
+            <button type="submit">
+                🔍 Search
+            </button>
+
         </form>
+
+
+        <!-- Filter -->
+
         <form action="/students" method="GET" class="filter-form">
 
+            <!-- Course -->
+
             <select name="course">
-                <option value="">All Courses</option>
+
+                <option value="">
+                    All Courses
+                </option>
 
                 <% courses.forEach(course=> { %>
-                    <option value="<%= course %>" <%=selectedCourse===course ? "selected" : "" %>
-                        >
-                        <%= course %>
-                    </option>
-                    <% }) %>
+
+                    <% if (selectedCourse===course) { %>
+
+                        <option value="<%= course %>" selected>
+                            <%= course %>
+                        </option>
+
+                        <% } else { %>
+
+                            <option value="<%= course %>">
+                                <%= course %>
+                            </option>
+
+                            <% } %>
+
+                                <% }) %>
+
             </select>
 
 
-            <select name="city">
-                <option value="">All Cities</option>
+            <!-- Address -->
 
-                <% cities.forEach(city=> { %>
-                    <option value="<%= city %>" <%=selectedCity===city ? "selected" : "" %>
-                        >
-                        <%= city %>
-                    </option>
-                    <% }) %>
+            <select name="address">
+
+                <option value="">
+                    All Addresses
+                </option>
+
+                <% addresses.forEach(address=> { %>
+
+                    <% if (selectedAddress===address) { %>
+
+                        <option value="<%= address %>" selected>
+                            <%= address %>
+                        </option>
+
+                        <% } else { %>
+
+                            <option value="<%= address %>">
+                                <%= address %>
+                            </option>
+
+                            <% } %>
+
+                                <% }) %>
+
             </select>
 
-            <button type="submit">Filter</button>
 
-            <a href="/students" class="clear-btn">Clear</a>
+            <button type="submit">
+                🔎 Filter
+            </button>
+
+
+            <a href="/students" class="clear-btn">
+                Clear
+            </a>
 
         </form>
 
-        <table>
 
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Age</th>
-                    <th>Course</th>
-                    <th>City</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+        <!-- Students Table -->
 
-            <tbody>
+        <div class="table-wrapper">
 
-                <% students.forEach(student=> { %>
+            <table>
+
+                <thead>
 
                     <tr>
 
-                        <td>
-                            <%= student.name %>
-                        </td>
+                        <th>
+                            Photo
+                        </th>
 
-                        <td>
-                            <%= student.age %>
-                        </td>
+                        <th>
+                            Name
+                        </th>
 
-                        <td>
-                            <%= student.course %>
-                        </td>
+                        <th>
+                            Father Name
+                        </th>
 
-                        <td>
-                            <%= student.city %>
-                        </td>
+                        <th>
+                            Mobile
+                        </th>
 
-                        <td>
-                            <div class="action-buttons">
+                        <th>
+                            Email
+                        </th>
 
-                                <a href="/students/edit/<%= student._id %>" class="edit-btn">
-                                    Edit
-                                </a>
+                        <th>
+                            Age
+                        </th>
 
-                                <form action="/students/delete/<%= student._id %>" method="POST"
-                                    onsubmit="return confirm('Are you sure you want to delete this student?');">
-                                    <button type="submit" class="delete-btn">
-                                        Delete
-                                    </button>
-                                </form>
+                        <th>
+                            Course
+                        </th>
 
-                            </div>
-                        </td>
+                        <th>
+                            Address
+                        </th>
+
+                        <th>
+                            Progress
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
 
                     </tr>
 
-                    <% }) %>
+                </thead>
 
-            </tbody>
 
-        </table>
+                <tbody>
+
+
+                    <!-- No Students -->
+
+                    <% if (students.length===0) { %>
+
+                        <tr>
+
+                            <td colspan="10" class="no-data">
+                                No students found.
+                            </td>
+
+                        </tr>
+
+                        <% } %>
+
+
+
+                            <!-- Students -->
+
+                            <% students.forEach(student=> { %>
+
+                                <tr>
+
+
+                                    <!-- Photo -->
+
+                                    <td>
+
+                                        <% if (student.photo) { %>
+
+                                            <img src="<%= student.photo %>" alt="Student Photo" class="student-photo">
+
+                                            <% } else { %>
+
+                                                <div class="no-photo">
+                                                    👤
+                                                </div>
+
+                                                <% } %>
+
+                                    </td>
+
+
+
+                                    <!-- Name -->
+
+                                    <td>
+
+                                        <strong>
+                                            <%= student.name %>
+                                        </strong>
+
+                                    </td>
+
+
+
+                                    <!-- Father Name -->
+
+                                    <td>
+
+                                        <%= student.fatherName %>
+
+                                    </td>
+
+
+
+                                    <!-- Mobile -->
+
+                                    <td>
+
+                                        <%= student.mobile %>
+
+                                    </td>
+
+
+
+                                    <!-- Email -->
+
+                                    <td>
+
+                                        <%= student.email %>
+
+                                    </td>
+
+
+
+                                    <!-- Age -->
+
+                                    <td>
+
+                                        <%= student.age %>
+
+                                    </td>
+
+
+
+                                    <!-- Course -->
+
+                                    <td>
+
+                                        <%= student.course %>
+
+                                    </td>
+
+
+
+                                    <!-- Address -->
+
+                                    <td>
+
+                                        <%= student.address %>
+
+                                    </td>
+
+
+
+                                    <!-- Progress -->
+
+                                    <td>
+
+                                        <div class="progress-container">
+
+                                            <div class="progress-bar">
+
+                                                <div class="progress-fill" data-progress="<%= student.progress %>">
+                                                </div>
+
+                                            </div>
+
+
+                                            <span class="progress-text">
+
+                                                <%= student.progress %>%
+
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+
+
+                                    <!-- Actions -->
+
+                                    <td>
+
+                                        <div class="action-buttons">
+
+
+                                            <!-- Edit -->
+
+                                            <a href="/students/edit/<%= student._id %>" class="edit-btn">
+                                                ✏️ Edit
+                                            </a>
+
+
+
+                                            <!-- Delete -->
+
+                                            <form action="/students/delete/<%= student._id %>" method="POST"
+                                                onsubmit="return confirm('Are you sure you want to delete this student?');">
+
+                                                <button type="submit" class="delete-btn">
+                                                    🗑️ Delete
+                                                </button>
+
+                                            </form>
+
+
+                                        </div>
+
+                                    </td>
+
+
+                                </tr>
+
+                                <% }) %>
+
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
+
+
+
+    <!-- Progress Bar JavaScript -->
+
+    <script>
+
+        const progressBars =
+            document.querySelectorAll(
+                ".progress-fill"
+            );
+
+
+        progressBars.forEach(bar => {
+
+            const progress =
+                Number(
+                    bar.dataset.progress || 0
+                );
+
+
+            const safeProgress =
+                Math.max(
+                    0,
+                    Math.min(
+                        progress,
+                        100
+                    )
+                );
+
+
+            bar.style.width =
+                safeProgress + "%";
+
+        });
+
+    </script>
+
 
 </body>
 

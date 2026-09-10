@@ -2,9 +2,13 @@
 <html>
 
 <head>
+
     <title>Edit Student</title>
+
     <link rel="stylesheet" href="/style.css">
+
 </head>
+
 
 <body>
 
@@ -12,51 +16,796 @@
 
         <h1>✏️ Edit Student</h1>
 
-        <form action="/students/edit/<%= student._id %>" method="POST">
 
-            <label>Name:</label>
+        <form
+            action="/students/edit/<%= student._id %>"
+            method="POST"
+        >
+
+
+            <!-- =========================
+                 STUDENT DETAILS
+            ========================== -->
+
+            <h2 class="form-section-title">
+                👨‍🎓 Student Details
+            </h2>
+
+
+            <label>Student Name:</label>
+
             <input
                 type="text"
                 name="name"
-                value="<%= student.name %>"
+                value="<%= student.name || '' %>"
                 required
             >
 
+
+            <label>Father Name:</label>
+
+            <input
+                type="text"
+                name="fatherName"
+                value="<%= student.fatherName || '' %>"
+                required
+            >
+
+
+            <label>Mobile Number:</label>
+
+            <input
+                type="tel"
+                name="mobile"
+                value="<%= student.mobile || '' %>"
+                pattern="[0-9]{10}"
+                maxlength="10"
+                required
+            >
+
+
+            <label>Email:</label>
+
+            <input
+                type="email"
+                name="email"
+                value="<%= student.email || '' %>"
+                required
+            >
+
+
+            <label>Student Photo URL:</label>
+
+            <input
+                type="url"
+                name="photo"
+                value="<%= student.photo || '' %>"
+                placeholder="https://example.com/photo.jpg"
+            >
+
+
+            <% if (student.photo) { %>
+
+                <div class="current-photo">
+
+                    <p>Current Photo:</p>
+
+                    <img
+                        src="<%= student.photo %>"
+                        alt="Student Photo"
+                        class="edit-student-photo"
+                    >
+
+                </div>
+
+            <% } %>
+
+
             <label>Age:</label>
+
             <input
                 type="number"
                 name="age"
-                value="<%= student.age %>"
+                value="<%= student.age || '' %>"
+                min="1"
+                max="100"
                 required
             >
 
+
             <label>Course:</label>
+
             <input
                 type="text"
                 name="course"
-                value="<%= student.course %>"
+                value="<%= student.course || '' %>"
                 required
             >
 
-            <label>City:</label>
-            <input
-                type="text"
-                name="city"
-                value="<%= student.city %>"
-                required
-            >
 
-            <button type="submit" class="submit-btn">
-                Update Student
+            <label>Address:</label>
+
+            <textarea
+                name="address"
+                rows="4"
+                required
+            ><%= student.address || '' %></textarea>
+
+
+            <!-- =========================
+                 EXAMS
+            ========================== -->
+
+            <div class="exam-header">
+
+                <h2 class="form-section-title">
+                    📝 Exam Details
+                </h2>
+
+
+                <button
+                    type="button"
+                    class="add-exam-btn"
+                    onclick="addExam()"
+                >
+                    ➕ Add Exam
+                </button>
+
+            </div>
+
+
+            <div id="exams-container">
+
+
+                <% if (student.exams && student.exams.length > 0) { %>
+
+
+                    <% student.exams.forEach((exam, examIndex) => { %>
+
+
+                        <div
+                            class="exam-box"
+                            data-exam-index="<%= examIndex %>"
+                        >
+
+
+                            <div class="exam-title-row">
+
+                                <h3>
+                                    Exam <%= examIndex + 1 %>
+                                </h3>
+
+                            </div>
+
+
+                            <label>
+                                Exam Name:
+                            </label>
+
+                            <input
+                                type="text"
+                                name="exams[<%= examIndex %>][examName]"
+                                value="<%= exam.examName || '' %>"
+                                required
+                            >
+
+
+                            <div class="subjects-container">
+
+
+                                <% if (exam.subjects && exam.subjects.length > 0) { %>
+
+
+                                    <% exam.subjects.forEach((subject, subjectIndex) => { %>
+
+
+                                        <div
+                                            class="subject-box"
+                                            data-subject-index="<%= subjectIndex %>"
+                                        >
+
+
+                                            <h4>
+                                                Subject <%= subjectIndex + 1 %>
+                                            </h4>
+
+
+                                            <label>
+                                                Subject Name:
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="exams[<%= examIndex %>][subjects][<%= subjectIndex %>][subjectName]"
+                                                value="<%= subject.subjectName || '' %>"
+                                                required
+                                            >
+
+
+                                            <label>
+                                                Total Marks:
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="exams[<%= examIndex %>][subjects][<%= subjectIndex %>][totalMarks]"
+                                                value="<%= subject.totalMarks || '' %>"
+                                                min="1"
+                                                required
+                                            >
+
+
+                                            <label>
+                                                Obtained Marks:
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="exams[<%= examIndex %>][subjects][<%= subjectIndex %>][obtainedMarks]"
+                                                value="<%= subject.obtainedMarks || '' %>"
+                                                min="0"
+                                                required
+                                            >
+
+
+                                            <button
+                                                type="button"
+                                                class="remove-subject-btn"
+                                                onclick="removeSubject(this)"
+                                            >
+                                                🗑️ Remove Subject
+                                            </button>
+
+
+                                        </div>
+
+
+                                    <% }) %>
+
+
+                                <% } else { %>
+
+
+                                    <!-- Default Subject -->
+
+                                    <div
+                                        class="subject-box"
+                                        data-subject-index="0"
+                                    >
+
+                                        <h4>
+                                            Subject 1
+                                        </h4>
+
+
+                                        <label>
+                                            Subject Name:
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            name="exams[<%= examIndex %>][subjects][0][subjectName]"
+                                            required
+                                        >
+
+
+                                        <label>
+                                            Total Marks:
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            name="exams[<%= examIndex %>][subjects][0][totalMarks]"
+                                            min="1"
+                                            required
+                                        >
+
+
+                                        <label>
+                                            Obtained Marks:
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            name="exams[<%= examIndex %>][subjects][0][obtainedMarks]"
+                                            min="0"
+                                            required
+                                        >
+
+
+                                        <button
+                                            type="button"
+                                            class="remove-subject-btn"
+                                            onclick="removeSubject(this)"
+                                        >
+                                            🗑️ Remove Subject
+                                        </button>
+
+                                    </div>
+
+
+                                <% } %>
+
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="add-subject-btn"
+                                onclick="addSubject(this)"
+                            >
+                                ➕ Add Subject
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="remove-exam-btn"
+                                onclick="removeExam(this)"
+                            >
+                                🗑️ Remove Exam
+                            </button>
+
+
+                        </div>
+
+
+                    <% }) %>
+
+
+                <% } else { %>
+
+
+                    <!-- No Existing Exam -->
+
+                    <div
+                        class="exam-box"
+                        data-exam-index="0"
+                    >
+
+                        <div class="exam-title-row">
+
+                            <h3>
+                                Exam 1
+                            </h3>
+
+                        </div>
+
+
+                        <label>
+                            Exam Name:
+                        </label>
+
+                        <input
+                            type="text"
+                            name="exams[0][examName]"
+                            placeholder="Example: Mid Term"
+                        >
+
+
+                        <div class="subjects-container">
+
+                            <div
+                                class="subject-box"
+                                data-subject-index="0"
+                            >
+
+                                <h4>
+                                    Subject 1
+                                </h4>
+
+
+                                <label>
+                                    Subject Name:
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="exams[0][subjects][0][subjectName]"
+                                    placeholder="Example: Mathematics"
+                                >
+
+
+                                <label>
+                                    Total Marks:
+                                </label>
+
+                                <input
+                                    type="number"
+                                    name="exams[0][subjects][0][totalMarks]"
+                                    min="1"
+                                >
+
+
+                                <label>
+                                    Obtained Marks:
+                                </label>
+
+                                <input
+                                    type="number"
+                                    name="exams[0][subjects][0][obtainedMarks]"
+                                    min="0"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="add-subject-btn"
+                            onclick="addSubject(this)"
+                        >
+                            ➕ Add Subject
+                        </button>
+
+                    </div>
+
+
+                <% } %>
+
+
+            </div>
+
+
+            <!-- =========================
+                 UPDATE BUTTON
+            ========================== -->
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+                💾 Update Student
             </button>
+
 
         </form>
 
-        <a href="/students" class="back-btn">
+
+        <a
+            href="/students"
+            class="back-btn"
+        >
             ← Back to Students
         </a>
 
+
     </div>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+
+        // Next exam index
+
+        let examIndex =
+            document.querySelectorAll(
+                ".exam-box"
+            ).length;
+
+
+        // =========================
+        // Add Exam
+        // =========================
+
+        function addExam() {
+
+            const container =
+                document.getElementById(
+                    "exams-container"
+                );
+
+
+            const currentExamIndex =
+                examIndex;
+
+
+            const exam =
+                document.createElement("div");
+
+
+            exam.className =
+                "exam-box";
+
+
+            exam.setAttribute(
+                "data-exam-index",
+                currentExamIndex
+            );
+
+
+            exam.innerHTML = `
+
+                <div class="exam-title-row">
+
+                    <h3>
+                        Exam ${currentExamIndex + 1}
+                    </h3>
+
+                </div>
+
+
+                <label>
+                    Exam Name:
+                </label>
+
+                <input
+                    type="text"
+                    name="exams[${currentExamIndex}][examName]"
+                    placeholder="Example: Final Exam"
+                    required
+                >
+
+
+                <div class="subjects-container">
+
+                    <div
+                        class="subject-box"
+                        data-subject-index="0"
+                    >
+
+                        <h4>
+                            Subject 1
+                        </h4>
+
+
+                        <label>
+                            Subject Name:
+                        </label>
+
+                        <input
+                            type="text"
+                            name="exams[${currentExamIndex}][subjects][0][subjectName]"
+                            placeholder="Example: Mathematics"
+                            required
+                        >
+
+
+                        <label>
+                            Total Marks:
+                        </label>
+
+                        <input
+                            type="number"
+                            name="exams[${currentExamIndex}][subjects][0][totalMarks]"
+                            min="1"
+                            required
+                        >
+
+
+                        <label>
+                            Obtained Marks:
+                        </label>
+
+                        <input
+                            type="number"
+                            name="exams[${currentExamIndex}][subjects][0][obtainedMarks]"
+                            min="0"
+                            required
+                        >
+
+
+                        <button
+                            type="button"
+                            class="remove-subject-btn"
+                            onclick="removeSubject(this)"
+                        >
+                            🗑️ Remove Subject
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="add-subject-btn"
+                    onclick="addSubject(this)"
+                >
+                    ➕ Add Subject
+                </button>
+
+
+                <button
+                    type="button"
+                    class="remove-exam-btn"
+                    onclick="removeExam(this)"
+                >
+                    🗑️ Remove Exam
+                </button>
+
+            `;
+
+
+            container.appendChild(exam);
+
+
+            examIndex++;
+
+        }
+
+
+        // =========================
+        // Add Subject
+        // =========================
+
+        function addSubject(button) {
+
+            const examBox =
+                button.closest(
+                    ".exam-box"
+                );
+
+
+            const currentExamIndex =
+                examBox.getAttribute(
+                    "data-exam-index"
+                );
+
+
+            const subjectsContainer =
+                examBox.querySelector(
+                    ".subjects-container"
+                );
+
+
+            const subjectIndex =
+                subjectsContainer.children.length;
+
+
+            const subject =
+                document.createElement("div");
+
+
+            subject.className =
+                "subject-box";
+
+
+            subject.setAttribute(
+                "data-subject-index",
+                subjectIndex
+            );
+
+
+            subject.innerHTML = `
+
+                <h4>
+                    Subject ${subjectIndex + 1}
+                </h4>
+
+
+                <label>
+                    Subject Name:
+                </label>
+
+                <input
+                    type="text"
+                    name="exams[${currentExamIndex}][subjects][${subjectIndex}][subjectName]"
+                    placeholder="Example: English"
+                    required
+                >
+
+
+                <label>
+                    Total Marks:
+                </label>
+
+                <input
+                    type="number"
+                    name="exams[${currentExamIndex}][subjects][${subjectIndex}][totalMarks]"
+                    min="1"
+                    required
+                >
+
+
+                <label>
+                    Obtained Marks:
+                </label>
+
+                <input
+                    type="number"
+                    name="exams[${currentExamIndex}][subjects][${subjectIndex}][obtainedMarks]"
+                    min="0"
+                    required
+                >
+
+
+                <button
+                    type="button"
+                    class="remove-subject-btn"
+                    onclick="removeSubject(this)"
+                >
+                    🗑️ Remove Subject
+                </button>
+
+            `;
+
+
+            subjectsContainer.appendChild(
+                subject
+            );
+
+        }
+
+
+        // =========================
+        // Remove Subject
+        // =========================
+
+        function removeSubject(button) {
+
+            const subjectBox =
+                button.closest(
+                    ".subject-box"
+                );
+
+
+            const container =
+                subjectBox.parentElement;
+
+
+            if (
+                container.children.length === 1
+            ) {
+
+                alert(
+                    "At least one subject is required."
+                );
+
+                return;
+
+            }
+
+
+            subjectBox.remove();
+
+        }
+
+
+        // =========================
+        // Remove Exam
+        // =========================
+
+        function removeExam(button) {
+
+            const examBox =
+                button.closest(
+                    ".exam-box"
+                );
+
+
+            const container =
+                document.getElementById(
+                    "exams-container"
+                );
+
+
+            if (
+                container.children.length === 1
+            ) {
+
+                alert(
+                    "At least one exam is required."
+                );
+
+                return;
+
+            }
+
+
+            examBox.remove();
+
+        }
+
+    </script>
 
 </body>
 
