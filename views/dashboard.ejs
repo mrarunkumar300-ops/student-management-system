@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+
+    <h1>Student Management Dashboard</h1>
+    <a href="/logout" class="logout-btn">🚪 Logout</a>
+    <a href="/students" class="dashboard-btn">
+        📋 Students List
+    </a>
+
+    <div class="dashboard-cards">
+
+        <div class="dashboard-card">
+            <h2>
+                <%= totalStudents %>
+            </h2>
+            <p>Total Students</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>
+                <%= totalCourses %>
+            </h2>
+            <p>Total Courses</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>
+                <%= totalCities %>
+            </h2>
+            <p>Total Cities</p>
+        </div>
+
+    </div>
+    <h2>Course-wise Students</h2>
+
+    <div class="course-list">
+
+        <% courseCounts.forEach(course=> { %>
+
+            <div class="course-item">
+                <span>
+                    <%= course._id %>
+                </span>
+                <strong>
+                    <%= course.count %>
+                </strong>
+            </div>
+
+            <% }) %>
+
+    </div>
+    <h2>City-wise Students</h2>
+
+    <div class="course-list">
+
+        <% cityCounts.forEach(city=> { %>
+
+            <div class="course-item">
+                <span>
+                    <%= city._id %>
+                </span>
+                <strong>
+                    <%= city.count %>
+                </strong>
+            </div>
+
+            <% }) %>
+
+    </div>
+
+    <div class="dashboard-links">
+        <a href="/students" class="dashboard-btn">
+            View Students
+        </a>
+
+        <a href="/students/add" class="dashboard-btn">
+            Add Student
+        </a>
+    </div>
+
+</body>
+
+</html>
