@@ -798,6 +798,69 @@ th {
     }
 
 }
+/* =================================
+   PHOTO VIEW POPUP
+================================= */
+
+.student-photo {
+    width: 50px !important;
+    height: 50px !important;
+    object-fit: cover;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.student-photo:hover {
+    transform: scale(1.1);
+}
+
+
+.photo-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+
+.large-photo {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+
+.close-photo {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+
+@media (max-width: 600px) {
+
+    .large-photo {
+        max-width: 95%;
+        max-height: 80vh;
+    }
+
+    .close-photo {
+        top: 10px;
+        right: 20px;
+        font-size: 35px;
+    }
+
+}
 
 
 /* Mobile */

@@ -8,7 +8,46 @@
     <link rel="stylesheet" href="/style.css">
 
 </head>
+<!-- Photo Popup -->
 
+<div id="photoModal" class="photo-modal" onclick="closePhoto()">
+
+    <span class="close-photo">
+        &times;
+    </span>
+
+    <img id="largePhoto" class="large-photo" src="" alt="Student Photo">
+
+</div>
+
+
+<script>
+
+    function openPhoto(photoUrl) {
+
+        const modal =
+            document.getElementById("photoModal");
+
+        const image =
+            document.getElementById("largePhoto");
+
+        image.src = photoUrl;
+
+        modal.style.display = "flex";
+
+    }
+
+
+    function closePhoto() {
+
+        const modal =
+            document.getElementById("photoModal");
+
+        modal.style.display = "none";
+
+    }
+
+</script>
 
 <body>
 
@@ -207,15 +246,10 @@
 
                                         <% if (student.photo) { %>
 
-                                            <img src="<%= student.photo %>" alt="Student Photo" class="student-photo">
+                                            <img src="<%= student.photo %>" alt="Student Photo" class="student-photo"
+                                                onclick="openPhoto('<%= student.photo %>')">
 
                                             <% } else { %>
-
-                                                <div class="no-photo">
-                                                    👤
-                                                </div>
-
-                                                <% } %>
 
                                     </td>
 
