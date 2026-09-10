@@ -1,15 +1,30 @@
+// ===============================
+// Environment
+// ===============================
+
 require("dotenv").config();
 
 console.log("STEP 1: dotenv loaded");
 
-const bcrypt = require("bcryptjs");
+
+// ===============================
+// Packages
+// ===============================
+
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
 
 const Student = require("./models/Student");
 
 console.log("STEP 2: packages loaded");
+
+
+// ===============================
+// App
+// ===============================
 
 const app = express();
 
@@ -20,11 +35,20 @@ console.log("STEP 3: app created");
 // Session
 // ===============================
 
-app.use(session({
-    secret: "student-management-secret",
-    resave: false,
-    saveUninitialized: false
-}));
+app.set("trust proxy", 1);
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || "student-management-secret",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: process.env.NODE_ENV === "production",
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000
+        }
+    })
+);
 
 
 // ===============================
@@ -37,9 +61,11 @@ app.set("view engine", "ejs");
 
 app.use(express.json());
 
-app.use(express.urlencoded({
-    extended: true
-}));
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+);
 
 
 // ===============================
@@ -51,7 +77,8 @@ console.log(
     !!process.env.MONGO_URI
 );
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+    .connect(process.env.MONGO_URI)
     .then(() => {
         console.log("MongoDB Connected!");
     })
@@ -89,9 +116,14 @@ app.get("/login", (req, res) => {
 
 });
 
+
 app.post("/login", (req, res) => {
 
-    const { username, password } = req.body;
+    const {
+        username,
+        password
+    } = req.body;
+
 
     if (
         username === process.env.ADMIN_USERNAME &&
@@ -127,7 +159,103 @@ app.get("/logout", (req, res) => {
 
 
 // ===============================
-// Helper Function
+// Cloudinary Setup
+// ===============================
+
+cloudinary.config({
+
+    cloud_name:
+        process.env.CLOUDINARY_CLOUD_NAME,
+
+    api_key:
+        process.env.CLOUDINARY_API_KEY,
+
+    api_secret:
+        process.env.CLOUDINARY_API_SECRET
+
+});
+
+
+// ===============================
+// Multer Setup
+// ===============================
+
+const upload = multer({
+
+    storage: multer.memoryStorage(),
+
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    },
+
+    fileFilter: (req, file, cb) => {
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+        if (allowedTypes.includes(file.mimetype)) {
+
+            cb(null, true);
+
+        } else {
+
+            cb(
+                new Error(
+                    "Only JPG, PNG and WEBP images are allowed"
+                )
+            );
+
+        }
+
+    }
+
+});
+
+
+// ===============================
+// Upload Photo to Cloudinary
+// ===============================
+
+function uploadToCloudinary(file) {
+
+    return new Promise((resolve, reject) => {
+
+        const stream =
+            cloudinary.uploader.upload_stream(
+
+                {
+                    folder: "student-management"
+                },
+
+                (error, result) => {
+
+                    if (error) {
+
+                        reject(error);
+
+                    } else {
+
+                        resolve(
+                            result.secure_url
+                        );
+
+                    }
+
+                }
+
+            );
+
+        stream.end(file.buffer);
+
+    });
+
+}
+
+
+// ===============================
 // Calculate Student Progress
 // ===============================
 
@@ -177,14 +305,17 @@ function calculateStudentProgress(student) {
 
 
     return Number(
-        ((obtainedMarks / totalMarks) * 100).toFixed(2)
+        (
+            (obtainedMarks / totalMarks) *
+            100
+        ).toFixed(2)
     );
 
 }
 
 
 // ===============================
-// Prepare Students with Progress
+// Add Progress to Students
 // ===============================
 
 function addProgressToStudents(students) {
@@ -196,8 +327,10 @@ function addProgressToStudents(students) {
                 ? student.toObject()
                 : student;
 
+
         studentObject.progress =
             calculateStudentProgress(student);
+
 
         return studentObject;
 
@@ -322,7 +455,9 @@ app.get(
             allStudents.forEach(student => {
 
                 totalProgress +=
-                    calculateStudentProgress(student);
+                    calculateStudentProgress(
+                        student
+                    );
 
             });
 
@@ -343,32 +478,40 @@ app.get(
             }
 
 
-            res.render("dashboard", {
+            res.render(
+                "dashboard",
+                {
 
-                totalStudents,
+                    totalStudents,
 
-                totalCourses:
-                    courses.length,
+                    totalCourses:
+                        courses.length,
 
-                totalAddresses:
-                    addresses.length,
+                    totalAddresses:
+                        addresses.length,
 
-                courseCounts,
+                    courseCounts,
 
-                addressCounts,
+                    addressCounts,
 
-                examCounts,
+                    examCounts,
 
-                averageProgress
+                    averageProgress
 
-            });
+                }
+            );
+
 
         } catch (error) {
 
-            console.log(error);
+            console.log(
+                "Dashboard Error:",
+                error
+            );
 
-            res.send(
-                "Error loading dashboard"
+            res.status(500).send(
+                "Error loading dashboard: " +
+                error.message
             );
 
         }
@@ -392,154 +535,159 @@ app.get("/", (req, res) => {
 // Students List
 // ===============================
 
-app.get("/students", async (req, res) => {
+app.get(
+    "/students",
+    async (req, res) => {
 
-    try {
+        try {
 
-        const search =
-            req.query.search || "";
-
-
-        const course =
-            req.query.course || "";
+            const search =
+                req.query.search || "";
 
 
-        const address =
-            req.query.address || "";
+            const course =
+                req.query.course || "";
 
 
-        const filter = {};
+            const address =
+                req.query.address || "";
 
 
-        // ===============================
-        // Search
-        // ===============================
+            const filter = {};
 
-        if (search) {
 
-            filter.$or = [
+            // Search
+            if (search) {
 
-                {
-                    name: {
-                        $regex: search,
-                        $options: "i"
+                filter.$or = [
+
+                    {
+                        name: {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        fatherName: {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        mobile: {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        email: {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        course: {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        address: {
+                            $regex: search,
+                            $options: "i"
+                        }
                     }
-                },
 
-                {
-                    fatherName: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                },
+                ];
 
-                {
-                    mobile: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                },
+            }
 
-                {
-                    email: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                },
 
-                {
-                    course: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                },
+            // Course Filter
+            if (course) {
 
+                filter.course = course;
+
+            }
+
+
+            // Address Filter
+            if (address) {
+
+                filter.address = address;
+
+            }
+
+
+            // Get Students
+            const students =
+                await Student.find(filter);
+
+
+            const studentsWithProgress =
+                addProgressToStudents(
+                    students
+                );
+
+
+            // Courses
+            const courses =
+                await Student.distinct(
+                    "course"
+                );
+
+
+            // Addresses
+            const addresses =
+                await Student.distinct(
+                    "address"
+                );
+
+
+            res.render(
+                "students",
                 {
-                    address: {
-                        $regex: search,
-                        $options: "i"
-                    }
+
+                    students:
+                        studentsWithProgress,
+
+                    search,
+
+                    courses,
+
+                    addresses,
+
+                    selectedCourse:
+                        course,
+
+                    selectedAddress:
+                        address
+
                 }
-
-            ];
-
-        }
+            );
 
 
-        // ===============================
-        // Course Filter
-        // ===============================
+        } catch (error) {
 
-        if (course) {
+            console.log(
+                "Students Error:",
+                error
+            );
 
-            filter.course = course;
-
-        }
-
-
-        // ===============================
-        // Address Filter
-        // ===============================
-
-        if (address) {
-
-            filter.address = address;
+            res.status(500).send(
+                "Error loading students: " +
+                error.message
+            );
 
         }
-
-
-        // ===============================
-        // Get Students
-        // ===============================
-
-        const students =
-            await Student.find(filter);
-
-
-        const studentsWithProgress =
-            addProgressToStudents(students);
-
-
-        // Courses
-        const courses =
-            await Student.distinct("course");
-
-
-        // Addresses
-        const addresses =
-            await Student.distinct("address");
-
-
-        res.render("students", {
-
-            students:
-                studentsWithProgress,
-
-            search,
-
-            courses,
-
-            addresses,
-
-            selectedCourse:
-                course,
-
-            selectedAddress:
-                address
-
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.send(
-            "Error loading students"
-        );
 
     }
-
-});
+);
 
 
 // ===============================
@@ -561,13 +709,10 @@ app.get(
 // Add Student
 // ===============================
 
-// ===============================
-// Add Student
-// ===============================
-
 app.post(
     "/students",
     isAuthenticated,
+    upload.single("photo"),
     async (req, res) => {
 
         try {
@@ -577,7 +722,6 @@ app.post(
                 fatherName,
                 mobile,
                 email,
-                photo,
                 age,
                 course,
                 address,
@@ -585,10 +729,7 @@ app.post(
             } = req.body;
 
 
-            // ===============================
             // Basic Validation
-            // ===============================
-
             if (
                 !name ||
                 !fatherName ||
@@ -598,34 +739,36 @@ app.post(
                 !course ||
                 !address
             ) {
+
                 return res.send(
                     "Please fill all required fields"
                 );
+
             }
 
 
-            // ===============================
             // Age Validation
-            // ===============================
-
             if (
                 Number(age) < 1 ||
                 Number(age) > 100
             ) {
+
                 return res.send(
                     "Please enter a valid age"
                 );
+
             }
 
 
-            // ===============================
             // Mobile Validation
-            // ===============================
+            if (
+                !/^[0-9]{10}$/.test(mobile)
+            ) {
 
-            if (!/^[0-9]{10}$/.test(mobile)) {
                 return res.send(
                     "Please enter a valid 10 digit mobile number"
                 );
+
             }
 
 
@@ -638,7 +781,6 @@ app.post(
 
             if (exams) {
 
-                // Multiple exams
                 const examArray =
                     Array.isArray(exams)
                         ? exams
@@ -647,9 +789,10 @@ app.post(
 
                 examArray.forEach(exam => {
 
-                    // Empty exam skip
                     if (!exam.examName) {
+
                         return;
+
                     }
 
 
@@ -658,78 +801,82 @@ app.post(
 
                     if (exam.subjects) {
 
-                        // Multiple subjects
                         const subjectArray =
-                            Array.isArray(exam.subjects)
+                            Array.isArray(
+                                exam.subjects
+                            )
                                 ? exam.subjects
                                 : [exam.subjects];
 
 
-                        subjectArray.forEach(subject => {
+                        subjectArray.forEach(
+                            subject => {
 
-                            // Empty subject skip
-                            if (!subject.subjectName) {
-                                return;
+                                if (
+                                    !subject.subjectName
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                const totalMarks =
+                                    Number(
+                                        subject.totalMarks
+                                    );
+
+
+                                const obtainedMarks =
+                                    Number(
+                                        subject.obtainedMarks
+                                    );
+
+
+                                if (
+                                    totalMarks <= 0
+                                ) {
+
+                                    throw new Error(
+                                        "Total marks must be greater than 0"
+                                    );
+
+                                }
+
+
+                                if (
+                                    obtainedMarks < 0 ||
+                                    obtainedMarks >
+                                    totalMarks
+                                ) {
+
+                                    throw new Error(
+                                        "Obtained marks must be between 0 and total marks"
+                                    );
+
+                                }
+
+
+                                subjects.push({
+
+                                    subjectName:
+                                        subject.subjectName,
+
+                                    totalMarks,
+
+                                    obtainedMarks
+
+                                });
+
                             }
-
-
-                            const totalMarks =
-                                Number(subject.totalMarks);
-
-                            const obtainedMarks =
-                                Number(subject.obtainedMarks);
-
-
-                            // ===============================
-                            // Total Marks Validation
-                            // ===============================
-
-                            if (totalMarks <= 0) {
-
-                                throw new Error(
-                                    "Total marks must be greater than 0"
-                                );
-
-                            }
-
-
-                            // ===============================
-                            // Obtained Marks Validation
-                            // ===============================
-
-                            if (
-                                obtainedMarks < 0 ||
-                                obtainedMarks > totalMarks
-                            ) {
-
-                                throw new Error(
-                                    "Obtained marks must be between 0 and total marks"
-                                );
-
-                            }
-
-
-                            subjects.push({
-
-                                subjectName:
-                                    subject.subjectName,
-
-                                totalMarks,
-
-                                obtainedMarks
-
-                            });
-
-                        });
+                        );
 
                     }
 
 
-                    // ===============================
-                    // Save Exam
-                    // ===============================
-
-                    if (subjects.length > 0) {
+                    if (
+                        subjects.length > 0
+                    ) {
 
                         formattedExams.push({
 
@@ -748,6 +895,23 @@ app.post(
 
 
             // ===============================
+            // Upload Photo
+            // ===============================
+
+            let photoUrl = "";
+
+
+            if (req.file) {
+
+                photoUrl =
+                    await uploadToCloudinary(
+                        req.file
+                    );
+
+            }
+
+
+            // ===============================
             // Create Student
             // ===============================
 
@@ -761,15 +925,18 @@ app.post(
 
                 email,
 
-                photo: photo || "",
+                photo:
+                    photoUrl,
 
-                age: Number(age),
+                age:
+                    Number(age),
 
                 course,
 
                 address,
 
-                exams: formattedExams
+                exams:
+                    formattedExams
 
             });
 
@@ -778,7 +945,9 @@ app.post(
             // Redirect
             // ===============================
 
-            res.redirect("/students");
+            res.redirect(
+                "/students"
+            );
 
 
         } catch (error) {
@@ -787,6 +956,7 @@ app.post(
                 "Error adding student:",
                 error
             );
+
 
             res.status(500).send(
                 "Error adding student: " +
@@ -820,7 +990,9 @@ app.get(
 
                 return res
                     .status(404)
-                    .send("Student not found");
+                    .send(
+                        "Student not found"
+                    );
 
             }
 
@@ -832,12 +1004,18 @@ app.get(
                 }
             );
 
+
         } catch (error) {
 
-            console.log(error);
+            console.log(
+                "Edit Page Error:",
+                error
+            );
+
 
             res.status(500).send(
-                "Error: " + error.message
+                "Error: " +
+                error.message
             );
 
         }
@@ -850,13 +1028,10 @@ app.get(
 // Edit Student
 // ===============================
 
-// ===============================
-// Edit Student
-// ===============================
-
 app.post(
     "/students/edit/:id",
     isAuthenticated,
+    upload.single("photo"),
     async (req, res) => {
 
         try {
@@ -866,7 +1041,7 @@ app.post(
                 fatherName,
                 mobile,
                 email,
-                photo,
+                oldPhoto,
                 age,
                 course,
                 address,
@@ -874,10 +1049,7 @@ app.post(
             } = req.body;
 
 
-            // ===============================
             // Basic Validation
-            // ===============================
-
             if (
                 !name ||
                 !fatherName ||
@@ -895,10 +1067,7 @@ app.post(
             }
 
 
-            // ===============================
             // Age Validation
-            // ===============================
-
             if (
                 Number(age) < 1 ||
                 Number(age) > 100
@@ -911,10 +1080,7 @@ app.post(
             }
 
 
-            // ===============================
             // Mobile Validation
-            // ===============================
-
             if (
                 !/^[0-9]{10}$/.test(mobile)
             ) {
@@ -935,9 +1101,6 @@ app.post(
 
             if (exams) {
 
-                // If only one exam is submitted
-                // convert it into an array
-
                 const examArray =
                     Array.isArray(exams)
                         ? exams
@@ -946,10 +1109,10 @@ app.post(
 
                 examArray.forEach(exam => {
 
-                    if (
-                        !exam.examName
-                    ) {
+                    if (!exam.examName) {
+
                         return;
+
                     }
 
 
@@ -966,71 +1129,70 @@ app.post(
                                 : [exam.subjects];
 
 
-                        subjectArray.forEach(subject => {
+                        subjectArray.forEach(
+                            subject => {
 
-                            if (
-                                !subject.subjectName
-                            ) {
-                                return;
+                                if (
+                                    !subject.subjectName
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                const totalMarks =
+                                    Number(
+                                        subject.totalMarks
+                                    );
+
+
+                                const obtainedMarks =
+                                    Number(
+                                        subject.obtainedMarks
+                                    );
+
+
+                                if (
+                                    totalMarks <= 0
+                                ) {
+
+                                    throw new Error(
+                                        "Total marks must be greater than 0"
+                                    );
+
+                                }
+
+
+                                if (
+                                    obtainedMarks < 0 ||
+                                    obtainedMarks >
+                                    totalMarks
+                                ) {
+
+                                    throw new Error(
+                                        "Obtained marks must be between 0 and total marks"
+                                    );
+
+                                }
+
+
+                                subjects.push({
+
+                                    subjectName:
+                                        subject.subjectName,
+
+                                    totalMarks,
+
+                                    obtainedMarks
+
+                                });
+
                             }
-
-
-                            const totalMarks =
-                                Number(
-                                    subject.totalMarks
-                                );
-
-
-                            const obtainedMarks =
-                                Number(
-                                    subject.obtainedMarks
-                                );
-
-
-                            // Total marks validation
-
-                            if (
-                                totalMarks <= 0
-                            ) {
-
-                                throw new Error(
-                                    "Total marks must be greater than 0"
-                                );
-
-                            }
-
-
-                            // Obtained marks validation
-
-                            if (
-                                obtainedMarks < 0 ||
-                                obtainedMarks > totalMarks
-                            ) {
-
-                                throw new Error(
-                                    "Obtained marks must be between 0 and total marks"
-                                );
-
-                            }
-
-
-                            subjects.push({
-
-                                subjectName:
-                                    subject.subjectName,
-
-                                totalMarks,
-
-                                obtainedMarks
-
-                            });
-
-                        });
+                        );
 
                     }
 
-
-                    // Only save exam if it has subjects
 
                     if (
                         subjects.length > 0
@@ -1053,6 +1215,24 @@ app.post(
 
 
             // ===============================
+            // Upload New Photo
+            // ===============================
+
+            let photoUrl =
+                oldPhoto || "";
+
+
+            if (req.file) {
+
+                photoUrl =
+                    await uploadToCloudinary(
+                        req.file
+                    );
+
+            }
+
+
+            // ===============================
             // Update Student
             // ===============================
 
@@ -1070,15 +1250,18 @@ app.post(
 
                     email,
 
-                    photo: photo || "",
+                    photo:
+                        photoUrl,
 
-                    age: Number(age),
+                    age:
+                        Number(age),
 
                     course,
 
                     address,
 
-                    exams: formattedExams
+                    exams:
+                        formattedExams
 
                 },
 
@@ -1093,11 +1276,9 @@ app.post(
             );
 
 
-            // ===============================
-            // Redirect
-            // ===============================
-
-            res.redirect("/students");
+            res.redirect(
+                "/students"
+            );
 
 
         } catch (error) {
@@ -1135,11 +1316,18 @@ app.post(
             );
 
 
-            res.redirect("/students");
+            res.redirect(
+                "/students"
+            );
+
 
         } catch (error) {
 
-            console.log(error);
+            console.log(
+                "Delete Error:",
+                error
+            );
+
 
             res.status(500).send(
                 "Error deleting student"
@@ -1172,10 +1360,8 @@ app.get(
                 return res
                     .status(404)
                     .json({
-
                         message:
                             "Student not found"
-
                     });
 
             }
@@ -1191,7 +1377,10 @@ app.get(
                 );
 
 
-            res.json(studentData);
+            res.json(
+                studentData
+            );
+
 
         } catch (error) {
 
@@ -1271,6 +1460,7 @@ app.put(
 
             });
 
+
         } catch (error) {
 
             res.status(500).json({
@@ -1329,6 +1519,7 @@ app.delete(
                     student
 
             });
+
 
         } catch (error) {
 
