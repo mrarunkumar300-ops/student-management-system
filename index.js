@@ -195,17 +195,7 @@ app.get("/dashboard", isAuthenticated, async (req, res) => {
 // ===============================
 
 app.get("/", (req, res) => {
-
-    if (req.session.isLoggedIn) {
-
-        res.redirect("/dashboard");
-
-    } else {
-
-        res.redirect("/login");
-
-    }
-
+    res.redirect("/students");
 });
 
 
@@ -213,7 +203,7 @@ app.get("/", (req, res) => {
 // Students List
 // ===============================
 
-app.get("/students", isAuthenticated, async (req, res) => {
+app.get("/students", async (req, res) => {
 
     try {
 
@@ -499,7 +489,7 @@ app.post("/students/delete/:id", isAuthenticated, async (req, res) => {
 // Get Student API
 // ===============================
 
-app.get("/students/:id", isAuthenticated, async (req, res) => {
+app.get("/students/:id", async (req, res) => {
 
     try {
 
