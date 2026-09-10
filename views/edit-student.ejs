@@ -1,58 +1,63 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Edit Student</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
 
-    <h1>Edit Student</h1>
+    <div class="form-container">
 
-    <form action="/students/edit/<%= student._id %>" method="POST">
+        <h1>✏️ Edit Student</h1>
 
-        <label>Name:</label>
-        <input
-            type="text"
-            name="name"
-            value="<%= student.name %>"
-            required
-        >
-        <br><br>
+        <form action="/students/edit/<%= student._id %>" method="POST">
 
-        <label>Age:</label>
-        <input
-            type="number"
-            name="age"
-            value="<%= student.age %>"
-            required
-        >
-        <br><br>
+            <label>Name:</label>
+            <input
+                type="text"
+                name="name"
+                value="<%= student.name %>"
+                required
+            >
 
-        <label>Course:</label>
-        <input
-            type="text"
-            name="course"
-            value="<%= student.course %>"
-            required
-        >
-        <br><br>
+            <label>Age:</label>
+            <input
+                type="number"
+                name="age"
+                value="<%= student.age %>"
+                required
+            >
 
-        <label>City:</label>
-        <input
-            type="text"
-            name="city"
-            value="<%= student.city %>"
-            required
-        >
-        <br><br>
+            <label>Course:</label>
+            <input
+                type="text"
+                name="course"
+                value="<%= student.course %>"
+                required
+            >
 
-        <button type="submit">Update Student</button>
+            <label>City:</label>
+            <input
+                type="text"
+                name="city"
+                value="<%= student.city %>"
+                required
+            >
 
-    </form>
+            <button type="submit" class="submit-btn">
+                Update Student
+            </button>
 
-    <br>
+        </form>
 
-    <a href="/students">Back to Students</a>
+        <a href="/students" class="back-btn">
+            ← Back to Students
+        </a>
+
+    </div>
 
 </body>
+
 </html>

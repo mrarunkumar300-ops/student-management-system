@@ -3,40 +3,40 @@
 
 <head>
     <title>Add Student</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-   
 
-    <h1>Add Student</h1>
+    <div class="form-container">
 
+        <h1>➕ Add Student</h1>
 
-    <form action="/students" method="POST">
+        <form action="/students" method="POST">
 
+            <label>Name:</label>
+            <input type="text" name="name" required>
 
-        <label>Name:</label>
-        <input type="text" name="name" required>
-        <br><br>
+            <label>Age:</label>
+            <input type="number" name="age" required>
 
-        <label>Age:</label>
-        <input type="number" name="age" required>
-        <br><br>
+            <label>Course:</label>
+            <input type="text" name="course" required>
 
-        <label>Course:</label>
-        <input type="text" name="course" required>
-        <br><br>
+            <label>City:</label>
+            <input type="text" name="city" required>
 
-        <label>City:</label>
-        <input type="text" name="city" required>
-        <br><br>
+            <button type="submit" class="submit-btn">
+                Add Student
+            </button>
 
-        <button type="submit">Add Student</button>
+        </form>
 
-    </form>
+        <a href="/students" class="back-btn">
+            ← Back to Students
+        </a>
 
-    <br>
-
-    <a href="/students">Back to Students</a>
+    </div>
 
 </body>
 

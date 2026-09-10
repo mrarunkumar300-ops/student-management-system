@@ -506,6 +506,86 @@ th {
     }
 
 }
+/* Add / Edit Student Form */
+
+.form-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.form-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-container label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 7px;
+    font-weight: 600;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 11px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.form-container input:focus {
+    outline: none;
+    border-color: #0d6efd;
+}
+
+.submit-btn {
+    width: 100% !important;
+    margin-top: 25px;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #0d6efd;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background: #0b5ed7;
+}
+
+.back-btn {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    text-decoration: underline;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .form-container {
+        margin: 20px 10px;
+        padding: 20px;
+    }
+
+    .form-container h1 {
+        font-size: 24px;
+    }
+
+}
 
 @media (max-width: 600px) {
     .filter-form {
