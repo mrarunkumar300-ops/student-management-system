@@ -10,63 +10,95 @@
 
     <div class="dashboard-container">
 
+        <!-- Header -->
         <div class="dashboard-header">
+
             <div>
                 <h1>📊 Student Dashboard</h1>
                 <p>Student Management System</p>
             </div>
 
-            <a href="/logout" class="logout-btn">🚪 Logout</a>
+            <a href="/logout" class="logout-btn">
+                🚪 Logout
+            </a>
+
         </div>
 
 
         <!-- Statistics Cards -->
-
         <div class="dashboard-cards">
 
+            <!-- Total Students -->
             <div class="dashboard-card">
+
                 <div class="card-icon">👨‍🎓</div>
+
                 <h2>
                     <%= totalStudents %>
                 </h2>
+
                 <p>Total Students</p>
+
             </div>
 
 
+            <!-- Total Courses -->
             <div class="dashboard-card">
+
                 <div class="card-icon">📚</div>
+
                 <h2>
                     <%= totalCourses %>
                 </h2>
+
                 <p>Total Courses</p>
+
             </div>
 
 
+            <!-- Total Addresses -->
             <div class="dashboard-card">
-                <div class="card-icon">🏙️</div>
+
+                <div class="card-icon">🏠</div>
+
                 <h2>
-                    <%= totalCities %>
+                    <%= totalAddresses %>
                 </h2>
-                <p>Total Cities</p>
+
+                <p>Total Addresses</p>
+
+            </div>
+
+
+            <!-- Average Progress -->
+            <div class="dashboard-card">
+
+                <div class="card-icon">📈</div>
+
+                <h2>
+                    <%= averageProgress %>%
+                </h2>
+
+                <p>Average Progress</p>
+
             </div>
 
         </div>
 
 
         <!-- Course Statistics -->
-
         <div class="dashboard-section">
 
             <h2>📚 Course-wise Students</h2>
 
             <div class="stats-list">
 
-                <% courseCounts.forEach(course=> { %>
+                <% courseCounts.forEach(course => { %>
 
                     <div class="stats-item">
 
                         <span>
-                            <%= course._id %>
+                            <%= course._id || "Unknown" %>
                         </span>
 
                         <strong>
@@ -75,36 +107,63 @@
 
                     </div>
 
-                    <% }) %>
+                <% }) %>
 
             </div>
 
         </div>
 
 
-        <!-- City Statistics -->
-
+        <!-- Address Statistics -->
         <div class="dashboard-section">
 
-            <h2>🏙️ City-wise Students</h2>
+            <h2>🏠 Address-wise Students</h2>
 
             <div class="stats-list">
 
-                <% cityCounts.forEach(city=> { %>
+                <% addressCounts.forEach(address => { %>
 
                     <div class="stats-item">
 
                         <span>
-                            <%= city._id %>
+                            <%= address._id || "Unknown" %>
                         </span>
 
                         <strong>
-                            <%= city.count %>
+                            <%= address.count %>
                         </strong>
 
                     </div>
 
-                    <% }) %>
+                <% }) %>
+
+            </div>
+
+        </div>
+
+
+        <!-- Exam Statistics -->
+        <div class="dashboard-section">
+
+            <h2>📝 Exam-wise Students</h2>
+
+            <div class="stats-list">
+
+                <% examCounts.forEach(exam => { %>
+
+                    <div class="stats-item">
+
+                        <span>
+                            <%= exam._id || "Unknown Exam" %>
+                        </span>
+
+                        <strong>
+                            <%= exam.count %>
+                        </strong>
+
+                    </div>
+
+                <% }) %>
 
             </div>
 
@@ -112,7 +171,6 @@
 
 
         <!-- Navigation -->
-
         <div class="dashboard-actions">
 
             <a href="/students" class="dashboard-btn">
