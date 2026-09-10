@@ -46,7 +46,8 @@ td {
 }
 
 th {
-    background: #fcd5d5;
+    background: #6c757d;
+    color: white;
 }
 
 .edit-btn,
@@ -798,6 +799,7 @@ th {
     }
 
 }
+
 /* =================================
    PHOTO VIEW POPUP
 ================================= */
@@ -858,6 +860,1308 @@ th {
         top: 10px;
         right: 20px;
         font-size: 35px;
+    }
+
+}
+
+/* =========================================
+   FINAL PROGRESS BAR FIX
+========================================= */
+
+.big-progress-bar {
+    width: 100% !important;
+    height: 22px !important;
+    background: #e5e7eb !important;
+    border-radius: 50px !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.big-progress-fill {
+    height: 100% !important;
+
+    /* JavaScript yahan value dalega */
+    width: var(--progress-width, 0%) !important;
+
+    border-radius: 50px !important;
+
+    background: linear-gradient(90deg,
+            #00c853,
+            #64dd17,
+            #00b0ff,
+            #7c4dff) !important;
+
+    background-size: 200% 100% !important;
+
+    animation: progressGradient 2s linear infinite;
+
+    transition: width 1.5s ease;
+
+    box-shadow:
+        0 0 10px rgba(0, 176, 255, 0.6);
+}
+
+
+@keyframes progressGradient {
+
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+
+}
+
+/* =========================================
+   STUDENT DETAILS / VIEW PAGE
+========================================= */
+
+.student-details-container {
+    width: 92%;
+    max-width: 1200px;
+    margin: 30px auto;
+}
+
+
+/* Header */
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.details-header h1 {
+    margin: 0;
+}
+
+.details-header p {
+    margin: 5px 0 0;
+}
+
+.details-header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+
+/* =========================================
+   PROFILE CARD
+========================================= */
+
+.profile-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =========================================
+   STUDENT PROFILE PHOTO
+========================================= */
+
+.profile-photo-section {
+    width: 180px;
+    min-width: 180px;
+    height: 180px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 15px;
+}
+
+
+/* IMPORTANT */
+
+.profile-photo {
+    width: 180px !important;
+    height: 180px !important;
+    max-width: 180px !important;
+    max-height: 180px !important;
+    min-width: 180px !important;
+    min-height: 180px !important;
+
+    display: block;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+
+/* No Photo */
+
+.profile-no-photo {
+    width: 180px !important;
+    height: 180px !important;
+    max-width: 180px !important;
+    max-height: 180px !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eeeeee;
+    border-radius: 15px;
+
+    font-size: 65px;
+}
+
+
+/* =========================================
+   PROFILE INFORMATION
+========================================= */
+
+.profile-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-info h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 30px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.info-item {
+    padding: 12px;
+    background: #f7f7f7;
+    border-radius: 8px;
+}
+
+.info-item span {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.info-item strong {
+    display: block;
+    word-break: break-word;
+}
+
+
+/* =========================================
+   OVERALL PROGRESS
+========================================= */
+
+.overall-progress-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: white;
+    margin-top: 25px;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.overall-progress-card h2 {
+    margin-top: 0;
+}
+
+.big-progress {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.big-progress-bar {
+    flex: 1;
+    height: 18px;
+    background: #e5e5e5;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.big-progress-fill {
+    height: 100%;
+    width: 0;
+    background: #198754;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+}
+
+.big-progress strong {
+    font-size: 22px;
+    min-width: 60px;
+}
+
+
+/* =========================================
+   EXAM RESULTS
+========================================= */
+
+.exams-details-section {
+    margin-top: 25px;
+}
+
+.exam-result-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: white;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.exam-title h3 {
+    margin-top: 0;
+}
+
+.subject-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.subject-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.subject-table th,
+.subject-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.subject-table th {
+    background: #f2f2f2;
+}
+
+.no-exams {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+
+/* =========================================
+   VIEW BUTTON
+========================================= */
+
+.view-btn {
+    display: inline-block;
+    padding: 9px 12px;
+    background: #198754;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .student-details-container {
+        width: 94%;
+        margin: 15px auto;
+    }
+
+
+    .details-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+
+    .details-header-buttons {
+        width: 100%;
+    }
+
+
+    .details-header-buttons a {
+        flex: 1;
+        text-align: center;
+    }
+
+
+    /* Profile */
+
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+
+    .profile-photo-section {
+        width: 140px;
+        min-width: 140px;
+        height: 140px;
+    }
+
+
+    .profile-photo {
+        width: 140px !important;
+        height: 140px !important;
+        max-width: 140px !important;
+        max-height: 140px !important;
+        min-width: 140px !important;
+        min-height: 140px !important;
+    }
+
+
+    .profile-no-photo {
+        width: 140px !important;
+        height: 140px !important;
+        max-width: 140px !important;
+        max-height: 140px !important;
+    }
+
+
+    .profile-info {
+        width: 100%;
+    }
+
+
+    .profile-info h2 {
+        font-size: 24px;
+    }
+
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+
+
+    /* Progress */
+
+    .big-progress {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+
+    .big-progress strong {
+        text-align: center;
+    }
+
+
+    /* Exams */
+
+    .exam-result-card {
+        padding: 15px;
+    }
+
+}
+
+.student-list-btn {
+    display: inline-block;
+    padding: 9px 12px;
+    background: #0d6efd;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+}
+
+/* =========================================
+   EXAMINATION RESULTS - PROFESSIONAL UI
+========================================= */
+
+.exams-details-section {
+    margin-top: 28px;
+}
+
+.section-heading {
+    margin-bottom: 18px;
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: 25px;
+}
+
+.section-heading p {
+    margin: 5px 0 0;
+    color: #666;
+}
+
+
+/* =========================================
+   EXAM CARD
+========================================= */
+
+.exam-result-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 22px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.08);
+
+    border: 1px solid #eeeeee;
+}
+
+
+/* =========================================
+   EXAM HEADER
+========================================= */
+
+.exam-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+.exam-label {
+    display: block;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    color: #777;
+
+    margin-bottom: 5px;
+}
+
+.exam-result-header h3 {
+    margin: 0;
+
+    font-size: 22px;
+}
+
+
+/* =========================================
+   EXAM SCORE
+========================================= */
+
+.exam-score {
+    text-align: right;
+}
+
+.exam-score strong {
+    display: block;
+
+    font-size: 27px;
+    font-weight: 800;
+
+    color: #198754;
+}
+
+.exam-score span {
+    display: inline-block;
+
+    margin-top: 4px;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    background: #e8f7ee;
+
+    color: #198754;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* =========================================
+   SUBJECT CARD
+========================================= */
+
+.result-subject-card {
+    padding: 15px;
+
+    margin-bottom: 12px;
+
+    background: #f8f9fa;
+
+    border-radius: 10px;
+
+    border: 1px solid #eeeeee;
+}
+
+
+.subject-info {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 10px;
+}
+
+.subject-info strong {
+    font-size: 16px;
+}
+
+.subject-info span {
+    font-size: 13px;
+    color: #666;
+}
+
+
+/* =========================================
+   SUBJECT PROGRESS
+========================================= */
+
+.subject-progress-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.subject-progress {
+    flex: 1;
+
+    height: 10px;
+
+    background: #e2e5e8;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+.subject-progress-fill {
+    width: 0;
+
+    height: 100%;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(90deg,
+            #00c853,
+            #64dd17,
+            #00b0ff,
+            #7c4dff);
+
+    background-size: 200% 100%;
+
+    animation:
+        subjectGradient 2.5s linear infinite;
+
+    transition: width 1s ease;
+}
+
+@keyframes subjectGradient {
+
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+
+}
+
+.subject-percentage {
+    min-width: 55px;
+
+    text-align: right;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   EXAM SUMMARY
+========================================= */
+
+.exam-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 12px;
+
+    margin-top: 18px;
+}
+
+.exam-summary div {
+    padding: 13px;
+
+    background: #f5f6f7;
+
+    border-radius: 9px;
+
+    text-align: center;
+}
+
+.exam-summary span {
+    display: block;
+
+    font-size: 12px;
+
+    color: #777;
+
+    margin-bottom: 5px;
+}
+
+.exam-summary strong {
+    font-size: 18px;
+}
+
+
+/* =========================================
+   NO EXAMS
+========================================= */
+
+.no-exams {
+    background: white;
+
+    padding: 35px;
+
+    border-radius: 15px;
+
+    text-align: center;
+
+    color: #666;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .exam-result-card {
+        padding: 16px;
+    }
+
+    .exam-result-header {
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .exam-result-header h3 {
+        font-size: 18px;
+    }
+
+    .exam-score strong {
+        font-size: 22px;
+    }
+
+    .subject-info {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .subject-progress-row {
+        gap: 8px;
+    }
+
+    .exam-summary {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* =========================================
+   FINAL SUBJECT PROGRESS FIX
+========================================= */
+
+.result-subject-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.subject-progress {
+    width: 100%;
+    height: 12px !important;
+    background: #e1e5e9 !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+}
+
+.subject-progress-fill {
+    display: block !important;
+    height: 100% !important;
+    width: 0;
+
+    border-radius: 20px !important;
+
+    background: linear-gradient(90deg,
+            #00c853 0%,
+            #64dd17 35%,
+            #00b0ff 70%,
+            #7c4dff 100%) !important;
+
+    background-size: 200% 100% !important;
+
+    animation: subjectMoving 2s linear infinite;
+
+    transition: width 1.2s ease;
+}
+
+@keyframes subjectMoving {
+
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+
+}
+
+/* =========================================
+   PRINT BUTTON
+========================================= */
+
+.print-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 18px;
+
+    background: #198754;
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+}
+
+.print-btn:hover {
+    background: #157347;
+    transform: translateY(-2px);
+}
+
+
+/* =========================================
+   PRINT REPORT
+========================================= */
+
+@media print {
+
+    /* Page */
+
+    body {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+
+    /* Hide unnecessary elements */
+
+    .details-header-buttons,
+    .print-btn,
+    .student-list-btn,
+    .edit-btn {
+        display: none !important;
+    }
+
+
+    /* Main container */
+
+    .student-details-container {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 15px !important;
+    }
+
+
+    /* Header */
+
+    .details-header {
+        margin-bottom: 20px !important;
+    }
+
+
+    .details-header h1 {
+        font-size: 25px !important;
+    }
+
+
+    /* Cards */
+
+    .profile-card,
+    .overall-progress-card,
+    .exam-result-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+    }
+
+
+    /* Profile */
+
+    .profile-card {
+        page-break-inside: avoid;
+    }
+
+
+    .profile-photo {
+        width: 130px !important;
+        height: 130px !important;
+        max-width: 130px !important;
+        max-height: 130px !important;
+    }
+
+
+    .profile-photo-section {
+        width: 130px !important;
+        min-width: 130px !important;
+        height: 130px !important;
+    }
+
+
+    /* Progress */
+
+    .overall-progress-card {
+        page-break-inside: avoid;
+    }
+
+
+    .big-progress-fill {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+
+    .subject-progress-fill {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+
+    /* Exam */
+
+    .exam-result-card {
+        margin-bottom: 15px !important;
+    }
+
+
+    .exam-result-header {
+        page-break-inside: avoid;
+    }
+
+
+    .result-subject-card {
+        page-break-inside: avoid;
+    }
+
+
+    /* Background colors */
+
+    .exam-score span,
+    .result-subject-card,
+    .exam-summary div {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+
+    /* Remove animations while printing */
+
+    .big-progress-fill,
+    .subject-progress-fill {
+        animation: none !important;
+    }
+
+
+    /* Links */
+
+    a {
+        text-decoration: none !important;
+        color: black !important;
+    }
+
+}
+
+/* =========================================
+   PDF BUTTON
+========================================= */
+
+.pdf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 18px;
+
+    background: #dc3545;
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+}
+
+.pdf-btn:hover {
+    background: #bb2d3b;
+    transform: translateY(-2px);
+}
+
+
+/* PDF button mobile */
+
+@media (max-width: 700px) {
+
+    .pdf-btn {
+        flex: 1;
+    }
+
+}
+
+
+/* Hide PDF button while printing */
+
+@media print {
+
+    .pdf-btn {
+        display: none !important;
+    }
+
+}
+
+/* =========================================
+   FINAL PRINT / PDF REPORT
+========================================= */
+
+@media print {
+
+    @page {
+        size: A4 portrait;
+        margin: 8mm;
+    }
+
+    html,
+    body {
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Hide buttons */
+
+    .details-header-buttons,
+    .student-list-btn,
+    .edit-btn,
+    .print-btn,
+    .pdf-btn {
+        display: none !important;
+    }
+
+    /* Main container */
+
+    .student-details-container {
+        width: 100% !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Header */
+
+    .details-header {
+        margin-bottom: 10px !important;
+    }
+
+    .details-header h1 {
+        font-size: 22px !important;
+        margin: 0 !important;
+    }
+
+    /* Profile */
+
+    .profile-card {
+        width: 100% !important;
+        box-sizing: border-box;
+
+        padding: 12px !important;
+        margin: 0 0 10px 0 !important;
+
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .profile-photo-section {
+        width: 100px !important;
+        min-width: 100px !important;
+        height: 100px !important;
+    }
+
+    .profile-photo {
+        width: 100px !important;
+        height: 100px !important;
+
+        max-width: 100px !important;
+        max-height: 100px !important;
+    }
+
+    .profile-info h2 {
+        font-size: 22px !important;
+        margin: 0 0 10px 0 !important;
+    }
+
+    .info-grid {
+        gap: 7px !important;
+    }
+
+    .info-item {
+        padding: 7px !important;
+    }
+
+    .info-item span {
+        font-size: 10px !important;
+    }
+
+    .info-item strong {
+        font-size: 11px !important;
+    }
+
+    /* Overall Progress */
+
+    .overall-progress-card {
+        width: 100% !important;
+        box-sizing: border-box;
+
+        padding: 12px !important;
+        margin: 0 0 10px 0 !important;
+
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .overall-progress-card h2 {
+        font-size: 18px !important;
+    }
+
+    .overall-progress-card p {
+        font-size: 10px !important;
+    }
+
+    .big-progress-bar {
+        height: 12px !important;
+    }
+
+    .big-progress strong {
+        font-size: 16px !important;
+    }
+
+    /* Exam Section */
+
+    .exams-details-section {
+        margin-top: 10px !important;
+    }
+
+    .section-heading {
+        margin-bottom: 8px !important;
+    }
+
+    .section-heading h2 {
+        font-size: 18px !important;
+    }
+
+    .section-heading p {
+        font-size: 10px !important;
+    }
+
+    /* Exam Card */
+
+    .exam-result-card {
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .exam-result-header {
+        padding-bottom: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .exam-label {
+        font-size: 8px !important;
+    }
+
+    .exam-result-header h3 {
+        font-size: 16px !important;
+    }
+
+    .exam-score strong {
+        font-size: 18px !important;
+    }
+
+    .exam-score span {
+        font-size: 9px !important;
+        padding: 3px 7px !important;
+    }
+
+    /* Subject */
+
+    .result-subject-card {
+        padding: 8px !important;
+        margin-bottom: 6px !important;
+
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .subject-info {
+        margin-bottom: 5px !important;
+    }
+
+    .subject-info strong {
+        font-size: 11px !important;
+    }
+
+    .subject-info span {
+        font-size: 9px !important;
+    }
+
+    .subject-progress {
+        height: 7px !important;
+    }
+
+    .subject-percentage {
+        font-size: 9px !important;
+    }
+
+    /* Summary */
+
+    .exam-summary {
+        gap: 6px !important;
+        margin-top: 8px !important;
+    }
+
+    .exam-summary div {
+        padding: 7px !important;
+    }
+
+    .exam-summary span {
+        font-size: 8px !important;
+    }
+
+    .exam-summary strong {
+        font-size: 12px !important;
+    }
+
+    /* Keep colors in PDF */
+
+    .big-progress-fill,
+    .subject-progress-fill,
+    .exam-score span {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Stop animation during printing */
+
+    .big-progress-fill,
+    .subject-progress-fill {
+        animation: none !important;
+    }
+
+}
+
+/* =========================================
+   PRINT PHOTO - FINAL FIX
+========================================= */
+
+@media print {
+
+    .profile-photo-section {
+        width: 120px !important;
+        min-width: 120px !important;
+        height: 120px !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        overflow: hidden !important;
+
+        border-radius: 10px !important;
+        background: #f5f5f5 !important;
+    }
+
+    .profile-photo {
+        width: 120px !important;
+        height: 120px !important;
+
+        max-width: 120px !important;
+        max-height: 120px !important;
+
+        min-width: 120px !important;
+        min-height: 120px !important;
+
+        object-fit: contain !important;
+
+        object-position: center !important;
+
+        display: block !important;
+
+        border-radius: 10px !important;
+
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
 }
@@ -959,4 +2263,1061 @@ th {
     button {
         width: 100%;
     }
+}
+
+/* =========================================
+   ADMIN ANALYTICS DASHBOARD
+========================================= */
+
+.admin-dashboard {
+    width: 92%;
+    max-width: 1250px;
+    margin: 30px auto;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 32px;
+}
+
+.dashboard-header p {
+    margin: 5px 0 0;
+    color: #666;
+}
+
+.dashboard-header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+
+.dashboard-top-btn,
+.dashboard-logout {
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dashboard-top-btn {
+    background: #ffffff;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.dashboard-logout {
+    background: #dc3545;
+    color: white;
+}
+
+.dashboard-top-btn:hover,
+.dashboard-logout:hover {
+    transform: translateY(-2px);
+}
+
+
+/* =========================================
+   STATISTICS
+========================================= */
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    padding: 22px;
+
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.07);
+
+    border: 1px solid #eee;
+}
+
+.analytics-icon {
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    font-size: 28px;
+}
+
+.dashboard-card span {
+    color: #777;
+    font-size: 13px;
+}
+
+.dashboard-card h2 {
+    margin: 4px 0 0;
+    font-size: 28px;
+}
+
+
+/* =========================================
+   CHART GRID
+========================================= */
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+
+.chart-card {
+    background: white;
+    border-radius: 15px;
+    padding: 22px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.07);
+
+    border: 1px solid #eee;
+}
+
+
+.chart-full {
+    grid-column: 1 / -1;
+}
+
+
+.chart-header {
+    margin-bottom: 15px;
+}
+
+.chart-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.chart-header p {
+    margin: 5px 0 0;
+    color: #777;
+    font-size: 13px;
+}
+
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+
+/* =========================================
+   QUICK ACTIONS
+========================================= */
+
+.quick-actions {
+    background: white;
+    margin-top: 25px;
+    padding: 22px;
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.07);
+}
+
+.quick-actions h2 {
+    margin-top: 0;
+}
+
+
+.quick-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+
+.quick-action {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    padding: 15px;
+
+    background: #f8f9fa;
+
+    border-radius: 10px;
+
+    text-decoration: none;
+    color: #222;
+
+    border: 1px solid #eee;
+
+    transition: 0.25s ease;
+}
+
+
+.quick-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+.quick-action>span {
+    font-size: 28px;
+}
+
+
+.quick-action strong {
+    display: block;
+}
+
+.quick-action small {
+    color: #777;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .dashboard-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-full {
+        grid-column: auto;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .admin-dashboard {
+        width: 94%;
+        margin: 15px auto;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-header h1 {
+        font-size: 26px;
+    }
+
+    .dashboard-header-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dashboard-top-btn,
+    .dashboard-logout {
+        text-align: center;
+    }
+
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-card {
+        padding: 18px;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-card {
+        padding: 15px;
+    }
+
+    .chart-container {
+        height: 260px;
+    }
+
+    .quick-action-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* =========================================
+   FINAL ADMIN ANALYTICS
+========================================= */
+
+.analytics-section {
+    background: #ffffff;
+
+    padding: 22px;
+
+    margin-top: 20px;
+
+    border-radius: 16px;
+
+    border: 1px solid #eeeeee;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.07);
+}
+
+
+.analytics-section-header {
+    margin-bottom: 20px;
+}
+
+
+.analytics-section-header h2 {
+    margin: 0;
+
+    font-size: 20px;
+}
+
+
+.analytics-section-header p {
+    margin: 5px 0 0;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+.analytics-bars {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+
+.dashboard-bar-item {
+    width: 100%;
+}
+
+
+.dashboard-bar-label {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 7px;
+}
+
+
+.dashboard-bar-label span {
+    font-size: 14px;
+
+    font-weight: 600;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+.dashboard-bar-label strong {
+    min-width: 30px;
+
+    text-align: right;
+
+    font-size: 14px;
+}
+
+
+.dashboard-bar {
+    width: 100%;
+
+    height: 15px;
+
+    background: #e5e7eb;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+
+.dashboard-bar-fill {
+    height: 100%;
+
+    min-width: 5px;
+
+    border-radius: 20px;
+
+    background: linear-gradient(90deg,
+            #00c853,
+            #00b0ff,
+            #7c4dff);
+
+    background-size: 200% 100%;
+
+    animation: dashboardGradient 2.5s linear infinite;
+
+    transition: width 1s ease;
+}
+
+
+@keyframes dashboardGradient {
+
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+
+}
+
+
+.bar-percentage {
+    display: block;
+
+    margin-top: 4px;
+
+    text-align: right;
+
+    color: #777;
+
+    font-size: 11px;
+}
+
+
+.dashboard-no-data {
+    padding: 35px 15px;
+
+    text-align: center;
+
+    color: #777;
+
+    background: #f8f9fa;
+
+    border-radius: 10px;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .analytics-section {
+        padding: 16px;
+    }
+
+
+    .analytics-section-header h2 {
+        font-size: 18px;
+    }
+
+
+    .dashboard-bar-label span {
+        font-size: 12px;
+    }
+
+
+    .dashboard-bar-label strong {
+        font-size: 12px;
+    }
+
+
+    .dashboard-bar {
+        height: 12px;
+    }
+
+}
+
+/* =========================================
+   EXCEL EXPORT BUTTON
+========================================= */
+
+.excel-btn {
+    display: inline-block;
+
+    padding: 11px 18px;
+
+    margin: 8px 5px;
+
+    background: #0d6efd;
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    font-weight: 600;
+
+    transition: 0.25s ease;
+}
+
+.excel-btn:hover {
+    background: #0b5ed7;
+
+    transform: translateY(-2px);
+}
+
+.filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: #0d6efd;
+    padding: 15px;
+    outline: none;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    font-size: large;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .excel-btn {
+        display: block;
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+        text-align: center;
+
+        margin: 8px 0;
+    }
+
+}
+
+/* =========================================
+   ACTION BUTTONS - SIZE FIX
+========================================= */
+
+.action-buttons {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+}
+
+.action-buttons a,
+.action-buttons button {
+    width: auto !important;
+    min-width: 55px !important;
+    height: 42px !important;
+
+    padding: 7px 10px !important;
+    margin: 0 !important;
+
+    border-radius: 7px !important;
+
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+
+    white-space: nowrap !important;
+
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* Excel button */
+
+.action-buttons .excel-btn {
+    min-width: 75px !important;
+
+    padding: 7px 10px !important;
+
+    font-size: 13px !important;
+
+    margin: 0 !important;
+}
+
+
+/* Delete */
+
+.action-buttons .delete-btn {
+    min-width: 60px !important;
+}
+
+
+/* Edit */
+
+.action-buttons .edit-btn {
+    min-width: 55px !important;
+}
+
+
+/* View */
+
+.action-buttons .view-btn {
+    min-width: 55px !important;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .action-buttons {
+        gap: 5px !important;
+    }
+
+    .action-buttons a,
+    .action-buttons button {
+        min-width: 48px !important;
+        height: 38px !important;
+
+        padding: 5px 7px !important;
+
+        font-size: 11px !important;
+    }
+
+    .action-buttons .excel-btn {
+        min-width: 60px !important;
+        font-size: 11px !important;
+    }
+
+}
+
+/* =========================================================
+   SOFT EYE-FRIENDLY THEME
+========================================================= */
+
+:root {
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --text: #243044;
+    --muted: #667085;
+
+    --primary: #4f6ef7;
+    --primary-dark: #3f5bd4;
+
+    --secondary: #6d63d8;
+
+    --success: #22a06b;
+    --success-dark: #178457;
+
+    --danger: #d95763;
+    --danger-dark: #bd4652;
+
+    --border: #e2e8f0;
+    --soft: #f7f9fc;
+    --soft-blue: #eef3ff;
+}
+
+
+/* BODY */
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+
+/* CARDS */
+
+.container,
+.dashboard-card,
+.dashboard-section,
+.form-container,
+.login-box,
+.profile-card,
+.overall-progress-card,
+.exam-result-card,
+.quick-actions,
+.chart-card {
+    background: var(--card);
+    border-color: var(--border);
+
+    box-shadow:
+        0 8px 24px rgba(36, 48, 68, 0.07);
+}
+
+
+/* HEADINGS */
+
+h1,
+h2,
+h3,
+.dashboard-card h2,
+.profile-info h2 {
+    color: var(--text);
+}
+
+
+/* PRIMARY BUTTONS */
+
+.dashboard-btn,
+.submit-btn,
+.login-box button {
+    background: var(--primary);
+    color: white;
+}
+
+.dashboard-btn:hover,
+.submit-btn:hover,
+.login-box button:hover {
+    background: var(--primary-dark);
+}
+
+
+/* TOP DASHBOARD BUTTON */
+
+.dashboard-top-btn {
+    background: var(--soft-blue);
+    color: var(--primary);
+    border-color: #dbe4ff;
+}
+
+.dashboard-top-btn:hover {
+    background: #e5ecff;
+}
+
+
+/* LOGOUT */
+
+.dashboard-logout,
+.logout-btn,
+.pdf-btn {
+    background: var(--danger);
+}
+
+.dashboard-logout:hover,
+.logout-btn:hover,
+.pdf-btn:hover {
+    background: var(--danger-dark);
+}
+
+
+/* VIEW */
+
+.view-btn {
+    background: var(--success);
+    color: white;
+}
+
+.view-btn:hover {
+    background: var(--success-dark);
+}
+
+
+/* EXCEL */
+
+.excel-btn {
+    background: #258b63 !important;
+    color: white !important;
+}
+
+
+/* EDIT */
+
+.edit-btn {
+    background: #fff4df !important;
+    color: #9a671d !important;
+
+    border: 1px solid #f1dfbb !important;
+}
+
+.edit-btn:hover {
+    background: #ffedc9 !important;
+}
+
+
+/* DELETE */
+
+.delete-btn {
+    background: var(--danger) !important;
+    color: white !important;
+}
+
+.delete-btn:hover {
+    background: var(--danger-dark) !important;
+}
+
+
+/* CLEAR */
+
+.clear-btn {
+    background: #7b8798;
+}
+
+.clear-btn:hover {
+    background: #667284;
+}
+
+
+/* INPUTS */
+
+.search-form input,
+.filter-form select,
+.form-container input,
+.form-container textarea,
+.form-container select,
+.login-box input {
+    background: white;
+    color: var(--text);
+    border-color: #d7dee8;
+}
+
+
+/* INPUT FOCUS */
+
+.search-form input:focus,
+.filter-form select:focus,
+.form-container input:focus,
+.form-container textarea:focus,
+.form-container select:focus,
+.login-box input:focus {
+    outline: none;
+
+    border-color: #8ca2f8;
+
+    box-shadow:
+        0 0 0 3px rgba(79, 110, 247, 0.10);
+}
+
+
+/* TABLE HEADER */
+
+.table-wrapper th {
+    background: #eaf0ff;
+    color: #30456f;
+
+    border-bottom: 1px solid #d7e0f7;
+}
+
+
+/* TABLE BORDER */
+
+.table-wrapper th,
+.table-wrapper td,
+th,
+td {
+    border-bottom-color: #e3e8ef;
+}
+
+
+/* TABLE HOVER */
+
+.table-wrapper tbody tr:hover {
+    background: #f8faff;
+}
+
+
+/* SOFT BOXES */
+
+.stats-item,
+.info-item,
+.result-subject-card,
+.exam-summary div,
+.quick-action {
+    background: var(--soft);
+    border-color: var(--border);
+}
+
+
+/* BOX HOVER */
+
+.stats-item:hover,
+.quick-action:hover {
+    background: #f1f5ff;
+}
+
+
+/* DASHBOARD ICONS */
+
+.dashboard-card .analytics-icon {
+    background: #eef3ff;
+}
+
+.dashboard-card:nth-child(1) .analytics-icon {
+    background: #edf7f2;
+}
+
+.dashboard-card:nth-child(2) .analytics-icon {
+    background: #eef3ff;
+}
+
+.dashboard-card:nth-child(3) .analytics-icon {
+    background: #fff5e8;
+}
+
+.dashboard-card:nth-child(4) .analytics-icon {
+    background: #f2efff;
+}
+
+
+/* DASHBOARD GRAPH BAR */
+
+.dashboard-bar {
+    background: #e8edf4 !important;
+}
+
+.dashboard-bar-fill {
+    background:
+        linear-gradient(90deg,
+            #5b7cfa,
+            #7167d9) !important;
+
+    transition: width 0.8s ease;
+}
+
+
+/* MAIN PROGRESS */
+
+.big-progress-bar {
+    background: #e7ecf3 !important;
+}
+
+
+/* PROGRESS GRADIENT */
+
+.big-progress-fill,
+.subject-progress-fill {
+    background:
+        linear-gradient(90deg,
+            #4f6ef7,
+            #6d63d8,
+            #3aa7a0) !important;
+
+    background-size: 200% 100% !important;
+
+    box-shadow:
+        0 0 9px rgba(79, 110, 247, 0.20) !important;
+}
+
+
+/* SUBJECT PROGRESS */
+
+.subject-progress {
+    background: #e7ecf3 !important;
+}
+
+
+/* EXAM SCORE */
+
+.exam-score strong {
+    color: var(--success);
+}
+
+.exam-score span {
+    background: #eaf7f1;
+    color: var(--success);
+}
+
+
+/* PROFILE PHOTO */
+
+.profile-photo-section {
+    border: 3px solid #edf1f7;
+}
+
+.profile-no-photo {
+    background: #f1f4f8;
+}
+
+.no-photo {
+    background: #eef2f7;
+}
+
+
+/* PHOTO POPUP */
+
+.photo-modal {
+    background: rgba(28, 37, 52, 0.82);
+}
+
+
+/* PRINT BUTTON */
+
+.print-btn {
+    background: var(--success);
+}
+
+.print-btn:hover {
+    background: var(--success-dark);
+}
+
+
+/* CARD HOVER */
+
+.dashboard-card,
+.chart-card,
+.profile-card,
+.overall-progress-card,
+.exam-result-card {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover,
+.chart-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 28px rgba(36, 48, 68, 0.09);
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .action-buttons {
+        gap: 6px !important;
+    }
+
+    .action-buttons a,
+    .action-buttons button {
+        border-radius: 8px !important;
+    }
+
 }

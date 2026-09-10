@@ -2,188 +2,434 @@
 <html>
 
 <head>
-    <title>Student Dashboard</title>
+
+    <title>Admin Dashboard</title>
+
     <link rel="stylesheet" href="/style.css">
+
 </head>
+
 
 <body>
 
-    <div class="dashboard-container">
+    <div class="admin-dashboard">
 
-        <!-- Header -->
+
+        <!-- HEADER -->
+
         <div class="dashboard-header">
 
             <div>
-                <h1>📊 Student Dashboard</h1>
-                <p>Student Management System</p>
+
+                <h1>📊 Admin Dashboard</h1>
+
+                <p>Student Management System Analytics</p>
+
             </div>
 
-            <a href="/logout" class="logout-btn">
-                🚪 Logout
-            </a>
+
+            <div class="dashboard-header-actions">
+
+                <a href="/students" class="dashboard-top-btn">
+                    📋 Students
+                </a>
+
+                <a href="/students/add" class="dashboard-top-btn">
+                    ➕ Add Student
+                </a>
+
+                <a href="/logout" class="dashboard-logout">
+                    🚪 Logout
+                </a>
+
+            </div>
 
         </div>
 
 
-        <!-- Statistics Cards -->
+
+        <!-- STATISTICS CARDS -->
+
         <div class="dashboard-cards">
 
+
             <!-- Total Students -->
+
             <div class="dashboard-card">
 
-                <div class="card-icon">👨‍🎓</div>
+                <div class="analytics-icon">
+                    👨‍🎓
+                </div>
 
-                <h2>
-                    <%= totalStudents %>
-                </h2>
+                <div>
 
-                <p>Total Students</p>
+                    <span>Total Students</span>
+
+                    <h2>
+                        <%= totalStudents %>
+                    </h2>
+
+                </div>
 
             </div>
+
 
 
             <!-- Total Courses -->
+
             <div class="dashboard-card">
 
-                <div class="card-icon">📚</div>
+                <div class="analytics-icon">
+                    📚
+                </div>
 
-                <h2>
-                    <%= totalCourses %>
-                </h2>
+                <div>
 
-                <p>Total Courses</p>
+                    <span>Total Courses</span>
+
+                    <h2>
+                        <%= totalCourses %>
+                    </h2>
+
+                </div>
 
             </div>
+
 
 
             <!-- Total Addresses -->
+
             <div class="dashboard-card">
 
-                <div class="card-icon">🏠</div>
+                <div class="analytics-icon">
+                    📍
+                </div>
 
-                <h2>
-                    <%= totalAddresses %>
-                </h2>
+                <div>
 
-                <p>Total Addresses</p>
+                    <span>Total Addresses</span>
+
+                    <h2>
+                        <%= totalAddresses %>
+                    </h2>
+
+                </div>
 
             </div>
+
 
 
             <!-- Average Progress -->
+
             <div class="dashboard-card">
 
-                <div class="card-icon">📈</div>
+                <div class="analytics-icon">
+                    📈
+                </div>
 
-                <h2>
-                    <%= averageProgress %>%
-                </h2>
+                <div>
 
-                <p>Average Progress</p>
+                    <span>Average Progress</span>
+
+                    <h2>
+                        <%= averageProgress %>%
+                    </h2>
+
+                </div>
 
             </div>
+
 
         </div>
 
 
-        <!-- Course Statistics -->
-        <div class="dashboard-section">
 
-            <h2>📚 Course-wise Students</h2>
+        <!-- COURSE ANALYTICS -->
 
-            <div class="stats-list">
+        <div class="analytics-section">
 
-                <% courseCounts.forEach(course => { %>
+            <div class="analytics-section-header">
 
-                    <div class="stats-item">
+                <h2>📚 Course-wise Students</h2>
 
-                        <span>
-                            <%= course._id || "Unknown" %>
-                        </span>
+                <p>
+                    Students enrolled in each course
+                </p>
+
+            </div>
+
+
+            <% if (courseCounts && courseCounts.length> 0) { %>
+
+                <div class="analytics-bars">
+
+                    <% courseCounts.forEach(function(course) { %>
+
+                        <div class="dashboard-bar-item">
+
+                            <div class="dashboard-bar-label">
+
+                                <span>
+                                    <%= course._id || "Unknown Course" %>
+                                </span>
+
+                                <strong>
+                                    <%= course.count %>
+                                </strong>
+
+                            </div>
+
+
+                            <div class="dashboard-bar">
+
+                                <div class="dashboard-bar-fill" data-count="<%= course.count %>"
+                                    data-total="<%= totalStudents %>"></div>
+
+                            </div>
+
+                        </div>
+
+                        <% }); %>
+
+                </div>
+
+
+                <% } else { %>
+
+                    <div class="dashboard-no-data">
+                        📚 No course data available.
+                    </div>
+
+                    <% } %>
+
+        </div>
+
+
+
+        <!-- ADDRESS ANALYTICS -->
+
+        <div class="analytics-section">
+
+            <div class="analytics-section-header">
+
+                <h2>📍 Address-wise Students</h2>
+
+                <p>
+                    Students grouped by address
+                </p>
+
+            </div>
+
+
+            <% if (addressCounts && addressCounts.length> 0) { %>
+
+                <div class="analytics-bars">
+
+                    <% addressCounts.forEach(function(address) { %>
+
+                        <div class="dashboard-bar-item">
+
+                            <div class="dashboard-bar-label">
+
+                                <span>
+                                    <%= address._id || "Unknown Address" %>
+                                </span>
+
+                                <strong>
+                                    <%= address.count %>
+                                </strong>
+
+                            </div>
+
+
+                            <div class="dashboard-bar">
+
+                                <div class="dashboard-bar-fill" data-count="<%= address.count %>"
+                                    data-total="<%= totalStudents %>"></div>
+
+                            </div>
+
+                        </div>
+
+                        <% }); %>
+
+                </div>
+
+
+                <% } else { %>
+
+                    <div class="dashboard-no-data">
+                        📍 No address data available.
+                    </div>
+
+                    <% } %>
+
+        </div>
+
+
+
+        <!-- EXAM ANALYTICS -->
+
+        <div class="analytics-section">
+
+            <div class="analytics-section-header">
+
+                <h2>📝 Exam-wise Students</h2>
+
+                <p>
+                    Examination participation overview
+                </p>
+
+            </div>
+
+
+            <% if (examCounts && examCounts.length> 0) { %>
+
+                <div class="analytics-bars">
+
+                    <% examCounts.forEach(function(exam) { %>
+
+                        <div class="dashboard-bar-item">
+
+                            <div class="dashboard-bar-label">
+
+                                <span>
+                                    <%= exam._id || "Unknown Exam" %>
+                                </span>
+
+                                <strong>
+                                    <%= exam.count %>
+                                </strong>
+
+                            </div>
+
+
+                            <div class="dashboard-bar">
+
+                                <div class="dashboard-bar-fill" data-count="<%= exam.count %>"
+                                    data-total="<%= totalStudents %>"></div>
+
+                            </div>
+
+                        </div>
+
+                        <% }); %>
+
+                </div>
+
+
+                <% } else { %>
+
+                    <div class="dashboard-no-data">
+                        📝 No examination data available.
+                    </div>
+
+                    <% } %>
+
+        </div>
+
+
+
+        <!-- QUICK ACTIONS -->
+
+        <div class="quick-actions">
+
+            <h2>⚡ Quick Actions</h2>
+
+
+            <div class="quick-action-grid">
+
+                <a href="/students" class="quick-action">
+
+                    <span>📋</span>
+
+                    <div>
 
                         <strong>
-                            <%= course.count %>
+                            Students List
                         </strong>
+
+                        <small>
+                            View and manage all students
+                        </small>
 
                     </div>
 
-                <% }) %>
-
-            </div>
-
-        </div>
+                </a>
 
 
-        <!-- Address Statistics -->
-        <div class="dashboard-section">
+                <a href="/students/add" class="quick-action">
 
-            <h2>🏠 Address-wise Students</h2>
+                    <span>➕</span>
 
-            <div class="stats-list">
-
-                <% addressCounts.forEach(address => { %>
-
-                    <div class="stats-item">
-
-                        <span>
-                            <%= address._id || "Unknown" %>
-                        </span>
+                    <div>
 
                         <strong>
-                            <%= address.count %>
+                            Add Student
                         </strong>
+
+                        <small>
+                            Create a new student
+                        </small>
 
                     </div>
 
-                <% }) %>
+                </a>
 
             </div>
 
         </div>
 
-
-        <!-- Exam Statistics -->
-        <div class="dashboard-section">
-
-            <h2>📝 Exam-wise Students</h2>
-
-            <div class="stats-list">
-
-                <% examCounts.forEach(exam => { %>
-
-                    <div class="stats-item">
-
-                        <span>
-                            <%= exam._id || "Unknown Exam" %>
-                        </span>
-
-                        <strong>
-                            <%= exam.count %>
-                        </strong>
-
-                    </div>
-
-                <% }) %>
-
-            </div>
-
-        </div>
-
-
-        <!-- Navigation -->
-        <div class="dashboard-actions">
-
-            <a href="/students" class="dashboard-btn">
-                📋 Students List
-            </a>
-
-            <a href="/students/add" class="dashboard-btn">
-                ➕ Add Student
-            </a>
-
-        </div>
 
     </div>
+
+
+
+    <!-- BAR SCRIPT -->
+
+    <script>
+
+        const bars = document.querySelectorAll(
+            ".dashboard-bar-fill"
+        );
+
+
+        bars.forEach(function (bar) {
+
+            const count = Number(
+                bar.getAttribute("data-count") || 0
+            );
+
+
+            const total = Number(
+                bar.getAttribute("data-total") || 0
+            );
+
+
+            let percentage = 5;
+
+
+            if (total > 0) {
+
+                percentage =
+                    (count / total) * 100;
+
+            }
+
+
+            percentage = Math.min(
+                Math.max(percentage, 5),
+                100
+            );
+
+
+            bar.style.width =
+                percentage + "%";
+
+        });
+
+    </script>
+
 
 </body>
 

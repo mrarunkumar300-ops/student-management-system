@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        <%= student.name %> - Student Details
+    </title>
+
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const progressFill =
+            document.querySelector(".big-progress-fill");
+
+        if (!progressFill) {
+            return;
+        }
+
+        const progress =
+            Number(
+                progressFill.dataset.progress || 0
+            );
+
+        const safeProgress =
+            Math.max(
+                0,
+                Math.min(
+                    progress,
+                    100
+                )
+            );
+
+        setTimeout(function () {
+
+            progressFill.style.setProperty(
+                "--progress-width",
+                safeProgress + "%",
+                "important"
+            );
+
+        }, 200);
+
+    });
+
+</script>
+
+<body>
+
+
+    <div class="student-details-container">
+
+
+        <!-- Header -->
+
+        <div class="details-header">
+
+            <div>
+
+                <h1>
+                    🎓 Student Profile
+                </h1>
+
+
+
+            </div>
+
+
+            <div class="details-header-buttons">
+
+                <a href="/students" class="student-list-btn">
+                    ← Students List
+                </a>
+
+                <a href="/students/edit/<%= student._id %>" class="edit-btn">
+                    ✏️ Edit
+                </a>
+
+                <button type="button" class="print-btn" onclick="window.print()">
+                    🖨️ Print Report
+                </button>
+                <button type="button" class="pdf-btn" onclick="downloadPDF()">
+                    📄 Download PDF
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Student Profile -->
+
+        <div class="profile-card">
+
+
+            <!-- Photo -->
+
+            <div class="profile-photo-section">
+
+                <% if (student.photo) { %>
+
+                    <img src="<%= student.photo %>" alt="Student Photo" class="profile-photo">
+
+                    <% } else { %>
+
+                        <div class="profile-no-photo">
+                            👤
+                        </div>
+
+                        <% } %>
+
+            </div>
+
+
+
+            <!-- Basic Information -->
+
+            <div class="profile-info">
+
+                <h2>
+                    <%= student.name %>
+                </h2>
+
+
+                <div class="info-grid">
+
+
+                    <div class="info-item">
+
+                        <span>
+                            👨 Father Name
+                        </span>
+
+                        <strong>
+                            <%= student.fatherName || "-" %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>
+                            📱 Mobile
+                        </span>
+
+                        <strong>
+                            <%= student.mobile || "-" %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>
+                            📧 Email
+                        </span>
+
+                        <strong>
+                            <%= student.email || "-" %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>
+                            🎂 Age
+                        </span>
+
+                        <strong>
+                            <%= student.age %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>
+                            📚 Course
+                        </span>
+
+                        <strong>
+                            <%= student.course %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>
+                            📍 Address
+                        </span>
+
+                        <strong>
+                            <%= student.address || "-" %>
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Overall Progress -->
+
+        <div class="overall-progress-card">
+
+            <div>
+
+                <h2>
+                    📊 Overall Progress
+                </h2>
+
+                <p>
+                    Student's overall examination performance
+                </p>
+
+            </div>
+
+
+            <div class="big-progress">
+
+                <div class="big-progress-bar">
+
+                    <div class="big-progress-fill" data-progress="<%= progress %>"></div>
+
+                </div>
+
+                <strong>
+                    <%= progress %>%
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Exams -->
+        <!-- =========================================
+     EXAMINATION RESULTS
+========================================= -->
+
+        <div class="exams-details-section">
+
+            <div class="section-heading">
+                <div>
+                    <h2>📝 Examination Results</h2>
+                    <p>Subject-wise examination performance</p>
+                </div>
+            </div>
+
+
+            <% if (student.exams && student.exams.length> 0) { %>
+
+                <% student.exams.forEach((exam)=> { %>
+
+                    <% let examTotal=0; let examObtained=0; if (exam.subjects && exam.subjects.length> 0) {
+
+                        exam.subjects.forEach((subject) => {
+
+                        examTotal += Number(subject.totalMarks || 0);
+
+                        examObtained += Number(subject.obtainedMarks || 0);
+
+                        });
+
+                        }
+
+                        const examPercentage =
+                        examTotal > 0
+                        ? ((examObtained / examTotal) * 100).toFixed(2)
+                        : 0;
+
+                        let performance = "";
+
+                        if (examPercentage >= 80) {
+                        performance = "Excellent";
+                        } else if (examPercentage >= 60) {
+                        performance = "Good";
+                        } else if (examPercentage >= 40) {
+                        performance = "Average";
+                        } else {
+                        performance = "Needs Improvement";
+                        }
+                        %>
+
+
+                        <div class="exam-result-card">
+
+
+                            <!-- Exam Header -->
+
+                            <div class="exam-result-header">
+
+                                <div>
+
+                                    <span class="exam-label">
+                                        EXAMINATION
+                                    </span>
+
+                                    <h3>
+                                        📚 <%= exam.examName %>
+                                    </h3>
+
+                                </div>
+
+
+                                <div class="exam-score">
+
+                                    <strong>
+                                        <%= examPercentage %>%
+                                    </strong>
+
+                                    <span>
+                                        <%= performance %>
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Subjects -->
+
+                            <% if (exam.subjects && exam.subjects.length> 0) { %>
+
+                                <div class="result-subjects">
+
+                                    <% exam.subjects.forEach((subject)=> { %>
+
+                                        <% const percentage=subject.totalMarks> 0
+                                            ? ((subject.obtainedMarks / subject.totalMarks) * 100).toFixed(2)
+                                            : 0;
+                                            %>
+
+
+                                            <div class="result-subject-card">
+
+
+                                                <div class="subject-info">
+
+                                                    <strong>
+                                                        <%= subject.subjectName %>
+                                                    </strong>
+
+                                                    <span>
+                                                        <%= subject.obtainedMarks %>
+                                                            /
+                                                            <%= subject.totalMarks %>
+                                                                Marks
+                                                    </span>
+
+                                                </div>
+
+                                                <div class="subject-progress-row">
+
+                                                    <div class="subject-progress">
+
+                                                        <div class="subject-progress-fill"
+                                                            data-progress="<%= percentage %>"></div>
+
+                                                    </div>
+
+                                                    <strong class="subject-percentage">
+                                                        <%= percentage %>%
+                                                    </strong>
+
+                                                </div>
+
+
+                                            </div>
+
+
+                                            <% }) %>
+
+                                </div>
+
+
+                                <!-- Exam Summary -->
+
+                                <div class="exam-summary">
+
+                                    <div>
+
+                                        <span>
+                                            Total Marks
+                                        </span>
+
+                                        <strong>
+                                            <%= examTotal %>
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Obtained Marks
+                                        </span>
+
+                                        <strong>
+                                            <%= examObtained %>
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Percentage
+                                        </span>
+
+                                        <strong>
+                                            <%= examPercentage %>%
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <% } else { %>
+
+                                    <div class="no-data">
+                                        No subjects added for this examination.
+                                    </div>
+
+                                    <% } %>
+
+
+                        </div>
+
+
+                        <% }) %>
+
+
+                            <% } else { %>
+
+                                <div class="no-exams">
+
+                                    📝 No examination data available.
+
+                                </div>
+
+                                <% } %>
+
+        </div>
+
+
+
+    </div>
+
+
+</body>
+<script>
+
+    const subjectProgressBars =
+        document.querySelectorAll(
+            ".subject-progress-fill"
+        );
+
+    subjectProgressBars.forEach(function (bar) {
+
+        const progress =
+            Number(
+                bar.dataset.progress || 0
+            );
+
+        const safeProgress =
+            Math.max(
+                0,
+                Math.min(progress, 100)
+            );
+
+        setTimeout(function () {
+
+            bar.style.width =
+                safeProgress + "%";
+
+        }, 300);
+
+    });
+    function downloadPDF() {
+
+        window.print();
+
+    }
+
+</script>
+
+
+</html>
