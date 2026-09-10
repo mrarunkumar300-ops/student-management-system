@@ -10,6 +10,7 @@ require("dotenv").config();
 // ===============================
 const ExcelJS = require("exceljs");
 const express = require("express");
+const PDFDocument = require("pdfkit");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const multer = require("multer");
@@ -354,6 +355,52 @@ function calculateStudentProgress(
 
 }
 
+// =================================
+// Calculate Attendance Percentage
+// =================================
+
+function calculateAttendance(student) {
+
+    let present = 0;
+    let absent = 0;
+
+    if (
+        student.attendance &&
+        student.attendance.length > 0
+    ) {
+
+        student.attendance.forEach((record) => {
+
+            if (record.status === "Present") {
+                present++;
+            }
+
+            if (record.status === "Absent") {
+                absent++;
+            }
+
+        });
+
+    }
+
+    const total = present + absent;
+
+    let percentage = 0;
+
+    if (total > 0) {
+        percentage =
+            (present / total) * 100;
+    }
+
+    return {
+        present,
+        absent,
+        total,
+        percentage: Number(
+            percentage.toFixed(2)
+        )
+    };
+}
 
 // ===============================
 // Add Progress
@@ -667,100 +714,273 @@ app.get(
 
             ];
 
-
-            // Add students
-
-            students.forEach(
-                function (student) {
-
-                    const progress =
-                        calculateStudentProgress(
-                            student
-                        );
+            // =========================================
+            // ATTENDANCE
+            // =========================================
 
 
-                    let examText = "";
+            // Attendance Page
+
+            app.get(
+                "/attendance",
+                isAuthenticated,
+                async (req, res) => {
+
+                    try {
+
+                        // Today's date
+
+                        const today = new Date();
+
+                        const selectedDate =
+                            req.query.date ||
+                            today.toISOString().split("T")[0];
 
 
-                    if (
-                        student.exams &&
-                        student.exams.length > 0
-                    ) {
-
-                        student.exams.forEach(
-                            function (exam) {
-
-                                examText +=
-                                    exam.examName +
-                                    ": ";
+                        const students =
+                            await Student.find()
+                                .sort({ name: 1 });
 
 
-                                if (
-                                    exam.subjects &&
-                                    exam.subjects.length > 0
-                                ) {
+                        // Check attendance for selected date
 
-                                    exam.subjects.forEach(
-                                        function (subject) {
+                        students.forEach((student) => {
 
-                                            examText +=
-                                                subject.subjectName +
-                                                " (" +
-                                                subject.obtainedMarks +
-                                                "/" +
-                                                subject.totalMarks +
-                                                "), ";
+                            student.todayStatus = "";
+
+                            if (
+                                student.attendance &&
+                                student.attendance.length > 0
+                            ) {
+
+                                const record =
+                                    student.attendance.find(
+                                        (item) => {
+
+                                            const itemDate =
+                                                new Date(item.date)
+                                                    .toISOString()
+                                                    .split("T")[0];
+
+                                            return (
+                                                itemDate ===
+                                                selectedDate
+                                            );
 
                                         }
                                     );
 
+
+                                if (record) {
+
+                                    student.todayStatus =
+                                        record.status;
+
                                 }
 
+                            }
 
-                                examText += "\n";
+                        });
 
+
+                        res.render(
+                            "attendance",
+                            {
+                                students,
+                                selectedDate
                             }
                         );
 
-                    } else {
 
-                        examText =
-                            "No exams";
+                    } catch (error) {
+
+                        console.log(
+                            "Attendance Page Error:",
+                            error
+                        );
+
+                        res.status(500).send(
+                            "Error loading attendance: " +
+                            error.message
+                        );
 
                     }
 
+                }
+            );
 
-                    worksheet.addRow({
+            // Save Attendance
 
-                        name:
-                            student.name || "",
+            app.post(
+                "/attendance",
+                isAuthenticated,
+                async (req, res) => {
 
-                        fatherName:
-                            student.fatherName || "",
+                    try {
 
-                        mobile:
-                            student.mobile || "",
+                        const {
+                            date,
+                            attendance
+                        } = req.body;
 
-                        email:
-                            student.email || "",
 
-                        age:
-                            student.age || "",
+                        if (!date) {
 
-                        course:
-                            student.course || "",
+                            return res.status(400).send(
+                                "Please select a date"
+                            );
 
-                        address:
-                            student.address || "",
+                        }
 
-                        progress:
-                            progress + "%",
 
-                        exams:
-                            examText
+                        if (!attendance) {
 
-                    });
+                            return res.status(400).send(
+                                "Please mark attendance"
+                            );
 
+                        }
+
+
+                        // Save each student's attendance
+
+                        for (
+                            const studentId in attendance
+                        ) {
+
+                            const status =
+                                attendance[studentId];
+
+
+                            if (
+                                status !== "Present" &&
+                                status !== "Absent"
+                            ) {
+                                continue;
+                            }
+
+
+                            const student =
+                                await Student.findById(
+                                    studentId
+                                );
+
+
+                            if (!student) {
+                                continue;
+                            }
+
+
+                            // Convert selected date
+
+                            const selectedDate =
+                                new Date(date);
+
+
+                            selectedDate.setHours(
+                                0,
+                                0,
+                                0,
+                                0
+                            );
+
+
+                            // Check if attendance already exists
+
+                            const existingRecord =
+                                student.attendance.find(
+                                    (item) => {
+
+                                        const itemDate =
+                                            new Date(item.date);
+
+                                        itemDate.setHours(
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        );
+
+                                        return (
+                                            itemDate.getTime() ===
+                                            selectedDate.getTime()
+                                        );
+
+                                    }
+                                );
+
+
+                            if (existingRecord) {
+
+                                // Update existing attendance
+
+                                existingRecord.status =
+                                    status;
+
+                            } else {
+
+                                // Add new attendance
+
+                                student.attendance.push({
+
+                                    date: selectedDate,
+
+                                    status: status
+
+                                });
+
+                            }
+
+
+                            await student.save();
+
+                        }
+
+
+                        res.redirect(
+                            "/attendance?date=" +
+                            encodeURIComponent(date)
+                        );
+
+
+                    } catch (error) {
+
+                        console.log(
+                            "Save Attendance Error:",
+                            error
+                        );
+
+                        res.status(500).send(
+                            "Error saving attendance: " +
+                            error.message
+                        );
+
+                    }
+
+                }
+            );
+            // =========================================
+            // ATTENDANCE TEST
+            // =========================================
+
+            app.get("/attendance", isAuthenticated, (req, res) => {
+                res.send("Attendance page working!");
+            });
+
+            // Add students
+
+            const progress =
+                calculateStudentProgress(student);
+
+            const attendance =
+                calculateAttendance(student);
+
+            res.render(
+                "student-details",
+                {
+                    student,
+                    progress,
+                    attendance
                 }
             );
 
@@ -1369,58 +1589,723 @@ app.post(
 // ===============================
 // View Student
 // ===============================
+app.get("/students/view/:id", async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.id);
+
+        if (!student) {
+            return res.status(404).send("Student not found");
+        }
+
+        const progress =
+            calculateStudentProgress(student);
+
+        const attendance =
+            calculateAttendance(student);
+
+        res.render("student-details", {
+            student,
+            progress,
+            attendance
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Server Error");
+    }
+});
+// =========================================
+// PROFESSIONAL STUDENT PDF
+// =========================================
 
 app.get(
-    "/students/view/:id",
+    "/students/pdf/:id",
+    isAuthenticated,
     async (req, res) => {
 
         try {
 
-            const student =
-                await Student.findById(
-                    req.params.id
-                );
-
+            const student = await Student.findById(
+                req.params.id
+            );
 
             if (!student) {
+                return res.status(404).send(
+                    "Student not found"
+                );
+            }
 
-                return res
-                    .status(404)
-                    .send(
-                        "Student not found"
+            const progress =
+                calculateStudentProgress(student);
+            const attendance =
+                calculateAttendance(student);
+
+            // =================================
+            // Calculate Total / Obtained Marks
+            // =================================
+
+            let totalMarks = 0;
+            let obtainedMarks = 0;
+
+            if (
+                student.exams &&
+                student.exams.length > 0
+            ) {
+
+                student.exams.forEach((exam) => {
+
+                    if (
+                        exam.subjects &&
+                        exam.subjects.length > 0
+                    ) {
+
+                        exam.subjects.forEach((subject) => {
+
+                            totalMarks += Number(
+                                subject.totalMarks || 0
+                            );
+
+                            obtainedMarks += Number(
+                                subject.obtainedMarks || 0
+                            );
+
+                        });
+
+                    }
+
+                });
+
+            }
+
+            // =================================
+            // PDF
+            // =================================
+
+            const PDFDocument =
+                require("pdfkit");
+
+            const doc = new PDFDocument({
+                size: "A4",
+                margin: 40,
+                bufferPages: true
+            });
+
+            res.setHeader(
+                "Content-Type",
+                "application/pdf"
+            );
+
+            res.setHeader(
+                "Content-Disposition",
+                `attachment; filename="${student.name}-student-report.pdf"`
+            );
+
+            doc.pipe(res);
+
+            // =================================
+            // HEADER
+            // =================================
+
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(22)
+                .text(
+                    "STUDENT MANAGEMENT SYSTEM",
+                    {
+                        align: "center"
+                    }
+                );
+
+            doc
+                .moveDown(0.3)
+                .font("Helvetica")
+                .fontSize(12)
+                .text(
+                    "Student Academic Report",
+                    {
+                        align: "center"
+                    }
+                );
+
+            doc.moveDown(1);
+
+            // Header line
+            doc
+                .moveTo(40, doc.y)
+                .lineTo(555, doc.y)
+                .stroke();
+
+            doc.moveDown(1);
+
+            // =================================
+            // PHOTO + BASIC DETAILS
+            // =================================
+
+            const startY = doc.y;
+
+            // Photo box
+            if (student.photo) {
+
+                try {
+
+                    let photoUrl =
+                        student.photo;
+
+                    // Convert Cloudinary image to JPG
+                    if (
+                        photoUrl.includes(
+                            "/upload/"
+                        )
+                    ) {
+
+                        photoUrl =
+                            photoUrl.replace(
+                                "/upload/",
+                                "/upload/f_jpg/"
+                            );
+
+                    }
+
+                    const response =
+                        await fetch(photoUrl);
+
+                    if (response.ok) {
+
+                        const imageBuffer =
+                            Buffer.from(
+                                await response.arrayBuffer()
+                            );
+
+                        doc.image(
+                            imageBuffer,
+                            430,
+                            startY,
+                            {
+                                fit: [110, 110],
+                                align: "center",
+                                valign: "center"
+                            }
+                        );
+
+                    }
+
+                } catch (photoError) {
+
+                    console.log(
+                        "PDF Photo Error:",
+                        photoError.message
+                    );
+
+                }
+
+            }
+
+            // Student details heading
+
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(15)
+                .text(
+                    "Student Details",
+                    40,
+                    startY
+                );
+
+            doc.moveDown(0.6);
+
+            // Details helper
+            function detail(label, value) {
+
+                doc
+                    .font("Helvetica-Bold")
+                    .fontSize(10)
+                    .text(
+                        label + ": ",
+                        {
+                            continued: true
+                        }
+                    )
+                    .font("Helvetica")
+                    .text(
+                        value || "-"
+                    );
+            }
+
+            detail(
+                "Name",
+                student.name
+            );
+
+            detail(
+                "Father Name",
+                student.fatherName
+            );
+
+            detail(
+                "Mobile",
+                student.mobile
+            );
+
+            detail(
+                "Email",
+                student.email
+            );
+
+            detail(
+                "Age",
+                String(student.age || "-")
+            );
+
+            detail(
+                "Course",
+                student.course
+            );
+
+            detail(
+                "Address",
+                student.address
+            );
+
+            // Move below photo
+            doc.y = Math.max(
+                doc.y,
+                startY + 125
+            );
+
+            doc.moveDown(0.5);
+
+            // =================================
+            // PROGRESS SUMMARY
+            // =================================
+
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(15)
+                .text(
+                    "Academic Summary"
+                );
+
+            doc.moveDown(0.5);
+
+            // Summary box
+            const summaryY = doc.y;
+
+            doc
+                .rect(
+                    40,
+                    summaryY,
+                    515,
+                    65
+                )
+                .stroke();
+
+            // Total exams
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(11)
+                .text(
+                    "Total Exams",
+                    55,
+                    summaryY + 12
+                );
+
+            doc
+                .font("Helvetica")
+                .fontSize(13)
+                .text(
+                    String(
+                        student.exams
+                            ? student.exams.length
+                            : 0
+                    ),
+                    55,
+                    summaryY + 32
+                );
+
+            // Total marks
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(11)
+                .text(
+                    "Total Marks",
+                    190,
+                    summaryY + 12
+                );
+
+            doc
+                .font("Helvetica")
+                .fontSize(13)
+                .text(
+                    String(totalMarks),
+                    190,
+                    summaryY + 32
+                );
+
+            // Obtained marks
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(11)
+                .text(
+                    "Obtained Marks",
+                    320,
+                    summaryY + 12
+                );
+
+            doc
+                .font("Helvetica")
+                .fontSize(13)
+                .text(
+                    String(obtainedMarks),
+                    320,
+                    summaryY + 32
+                );
+
+            // Progress
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(11)
+                .text(
+                    "Progress",
+                    450,
+                    summaryY + 12
+                );
+
+            doc
+                .font("Helvetica")
+                .fontSize(13)
+                .text(
+                    progress + "%",
+                    450,
+                    summaryY + 32
+                );
+
+            doc.y = summaryY + 85;
+
+            // =================================
+            // ATTENDANCE SUMMARY
+            // =================================
+
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(15)
+                .text("Attendance Summary");
+
+            doc.moveDown(0.5);
+
+            const attendanceY = doc.y;
+
+            doc
+                .rect(
+                    40,
+                    attendanceY,
+                    515,
+                    65
+                )
+                .stroke();
+
+            // Present
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(11)
+                .text(
+                    "Present",
+                    55,
+                    attendanceY + 12
+                );
+
+            doc
+                .font("Helvetica")
+                .fontSize(13)
+                .text(
+                    String(attendance.present),
+                    55,
+                    attendanceY + 32
+                );
+
+            // Absent
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(11)
+                .text(
+                    "Absent",
+                    180,
+                    attendanceY + 12
+                );
+
+            doc
+                .font("Helvetica")
+                .fontSize(13)
+                .text(
+                    String(attendance.absent),
+                    180,
+                    attendanceY + 32
+                );
+
+            // Total Days
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(11)
+                .text(
+                    "Total Days",
+                    305,
+                    attendanceY + 12
+                );
+
+            doc
+                .font("Helvetica")
+                .fontSize(13)
+                .text(
+                    String(attendance.total),
+                    305,
+                    attendanceY + 32
+                );
+
+            // Attendance %
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(11)
+                .text(
+                    "Attendance",
+                    435,
+                    attendanceY + 12
+                );
+
+            doc
+                .font("Helvetica")
+                .fontSize(13)
+                .text(
+                    attendance.percentage + "%",
+                    435,
+                    attendanceY + 32
+                );
+
+            doc.y = attendanceY + 85;
+
+            // =================================
+            // EXAM RESULTS
+            // =================================
+
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(15)
+                .text(
+                    "Exam Results"
+                );
+
+            doc.moveDown(0.5);
+
+            if (
+                student.exams &&
+                student.exams.length > 0
+            ) {
+
+                student.exams.forEach(
+                    (exam) => {
+
+                        // Exam name
+                        doc
+                            .font("Helvetica-Bold")
+                            .fontSize(12)
+                            .text(
+                                exam.examName
+                            );
+
+                        doc.moveDown(0.3);
+
+                        // Table header
+                        const tableX = 40;
+                        const subjectWidth = 280;
+                        const marksWidth = 110;
+                        const totalWidth = 125;
+
+                        const rowY = doc.y;
+
+                        doc
+                            .rect(
+                                tableX,
+                                rowY,
+                                515,
+                                25
+                            )
+                            .stroke();
+
+                        doc
+                            .font("Helvetica-Bold")
+                            .fontSize(9)
+                            .text(
+                                "Subject",
+                                tableX + 8,
+                                rowY + 8
+                            );
+
+                        doc.text(
+                            "Obtained",
+                            tableX +
+                            subjectWidth +
+                            8,
+                            rowY + 8
+                        );
+
+                        doc.text(
+                            "Total",
+                            tableX +
+                            subjectWidth +
+                            marksWidth +
+                            8,
+                            rowY + 8
+                        );
+
+                        doc.y = rowY + 25;
+
+                        // Subjects
+                        if (
+                            exam.subjects &&
+                            exam.subjects.length > 0
+                        ) {
+
+                            exam.subjects.forEach(
+                                (subject) => {
+
+                                    // New page if needed
+                                    if (
+                                        doc.y > 730
+                                    ) {
+
+                                        doc.addPage();
+
+                                        doc
+                                            .font("Helvetica-Bold")
+                                            .fontSize(15)
+                                            .text(
+                                                "Exam Results - Continued"
+                                            );
+
+                                        doc.moveDown();
+
+                                    }
+
+                                    const subjectY =
+                                        doc.y;
+
+                                    doc
+                                        .rect(
+                                            tableX,
+                                            subjectY,
+                                            515,
+                                            24
+                                        )
+                                        .stroke();
+
+                                    doc
+                                        .font("Helvetica")
+                                        .fontSize(9)
+                                        .text(
+                                            subject.subjectName,
+                                            tableX + 8,
+                                            subjectY + 7,
+                                            {
+                                                width:
+                                                    subjectWidth - 15
+                                            }
+                                        );
+
+                                    doc.text(
+                                        String(
+                                            subject.obtainedMarks
+                                        ),
+                                        tableX +
+                                        subjectWidth +
+                                        8,
+                                        subjectY + 7
+                                    );
+
+                                    doc.text(
+                                        String(
+                                            subject.totalMarks
+                                        ),
+                                        tableX +
+                                        subjectWidth +
+                                        marksWidth +
+                                        8,
+                                        subjectY + 7
+                                    );
+
+                                    doc.y =
+                                        subjectY + 24;
+
+                                }
+                            );
+
+                        } else {
+
+                            doc
+                                .font("Helvetica")
+                                .fontSize(9)
+                                .text(
+                                    "No subjects available"
+                                );
+
+                        }
+
+                        doc.moveDown(0.8);
+
+                    }
+                );
+
+            } else {
+
+                doc
+                    .font("Helvetica")
+                    .fontSize(11)
+                    .text(
+                        "No exam results available."
                     );
 
             }
 
+            // =================================
+            // FOOTER
+            // =================================
 
-            const progress =
-                calculateStudentProgress(
-                    student
+            const pages =
+                doc.bufferedPageRange();
+
+            for (
+                let i = 0;
+                i < pages.count;
+                i++
+            ) {
+
+                doc.switchToPage(
+                    pages.start + i
                 );
 
+                doc
+                    .font("Helvetica")
+                    .fontSize(8)
+                    .text(
+                        `Student Report | Page ${i + 1} of ${pages.count}`,
+                        40,
+                        780,
+                        {
+                            align: "center",
+                            width: 515
+                        }
+                    );
 
-            res.render(
-                "student-details",
-                {
+            }
 
-                    student,
-
-                    progress
-
-                }
-            );
-
+            doc.end();
 
         } catch (error) {
 
             console.log(
-                "Student Details Error:",
+                "Professional PDF Error:",
                 error
             );
 
-
             res.status(500).send(
-                "Error loading student details: " +
+                "Error generating PDF: " +
                 error.message
             );
 
@@ -1429,10 +2314,6 @@ app.get(
     }
 );
 
-
-// ==================================================
-// EDIT STUDENT
-// ==================================================
 
 
 // ===============================
@@ -2042,6 +2923,420 @@ app.delete(
     }
 );
 
+// =========================================
+// ATTENDANCE SYSTEM
+// =========================================
+
+
+// =========================================
+// ATTENDANCE PAGE
+// =========================================
+
+app.get(
+    "/attendance",
+    isAuthenticated,
+    async (req, res) => {
+
+        try {
+
+            // Today's date
+            const today =
+                new Date().toISOString().split("T")[0];
+
+            const selectedDate =
+                req.query.date || today;
+
+
+            // Get all students
+            const students =
+                await Student.find()
+                    .sort({
+                        name: 1
+                    });
+
+
+            // Check attendance for selected date
+            students.forEach((student) => {
+
+                student.todayStatus = "";
+
+
+                if (
+                    student.attendance &&
+                    student.attendance.length > 0
+                ) {
+
+                    const record =
+                        student.attendance.find(
+                            (item) => {
+
+                                const itemDate =
+                                    new Date(item.date)
+                                        .toISOString()
+                                        .split("T")[0];
+
+                                return (
+                                    itemDate ===
+                                    selectedDate
+                                );
+
+                            }
+                        );
+
+
+                    if (record) {
+
+                        student.todayStatus =
+                            record.status;
+
+                    }
+
+                }
+
+            });
+
+
+            res.render(
+                "attendance",
+                {
+                    students,
+                    selectedDate
+                }
+            );
+
+
+        } catch (error) {
+
+            console.log(
+                "Attendance Page Error:",
+                error
+            );
+
+
+            res.status(500).send(
+                "Error loading attendance: " +
+                error.message
+            );
+
+        }
+
+    }
+);
+
+
+// =========================================
+// SAVE ATTENDANCE
+// =========================================
+
+app.post(
+    "/attendance",
+    isAuthenticated,
+    async (req, res) => {
+
+        try {
+
+            const date =
+                req.body.date;
+
+            const attendance =
+                req.body.attendance;
+
+
+            // Check date
+            if (!date) {
+
+                return res.status(400).send(
+                    "Please select a date"
+                );
+
+            }
+
+
+            // Check attendance
+            if (!attendance) {
+
+                return res.status(400).send(
+                    "Please mark attendance"
+                );
+
+            }
+
+
+            // IMPORTANT:
+            // Store date as UTC midnight
+            const selectedDate =
+                new Date(
+                    date + "T00:00:00.000Z"
+                );
+
+
+            // Next day
+            const nextDate =
+                new Date(
+                    selectedDate.getTime() +
+                    24 * 60 * 60 * 1000
+                );
+
+
+            // =================================
+            // Save every student's attendance
+            // =================================
+
+            for (
+                const studentId in attendance
+            ) {
+
+                const status =
+                    attendance[studentId];
+
+
+                // Only allow Present / Absent
+                if (
+                    status !== "Present" &&
+                    status !== "Absent"
+                ) {
+
+                    continue;
+
+                }
+
+
+                // Find student
+                const student =
+                    await Student.findById(
+                        studentId
+                    );
+
+
+                if (!student) {
+
+                    continue;
+
+                }
+
+
+                // =================================
+                // Check if attendance already exists
+                // =================================
+
+                const existingRecord =
+                    await Student.findOne({
+                        _id: studentId,
+
+                        "attendance.date": {
+                            $gte: selectedDate,
+                            $lt: nextDate
+                        }
+                    });
+
+
+                // =================================
+                // UPDATE EXISTING ATTENDANCE
+                // =================================
+
+                if (existingRecord) {
+
+                    await Student.updateOne(
+
+                        {
+                            _id: studentId,
+
+                            "attendance.date": {
+                                $gte: selectedDate,
+                                $lt: nextDate
+                            }
+                        },
+
+                        {
+                            $set: {
+                                "attendance.$.status":
+                                    status
+                            }
+                        }
+
+                    );
+
+                }
+
+
+                // =================================
+                // ADD NEW ATTENDANCE
+                // =================================
+
+                else {
+
+                    await Student.updateOne(
+
+                        {
+                            _id: studentId
+                        },
+
+                        {
+                            $push: {
+                                attendance: {
+
+                                    date:
+                                        selectedDate,
+
+                                    status:
+                                        status
+
+                                }
+                            }
+                        }
+
+                    );
+
+                }
+
+            }
+
+
+            // =================================
+            // Redirect back
+            // =================================
+
+            res.redirect(
+                "/attendance?date=" +
+                encodeURIComponent(date)
+            );
+
+
+        } catch (error) {
+
+            console.log(
+                "Save Attendance Error:",
+                error
+            );
+
+
+            res.status(500).send(
+                "Error saving attendance: " +
+                error.message
+            );
+
+        }
+
+    }
+);
+
+// =========================================
+// ABSENT STUDENTS PANEL
+// =========================================
+
+app.get(
+    "/attendance/absent",
+    isAuthenticated,
+    async (req, res) => {
+
+        try {
+
+            const today =
+                new Date()
+                    .toISOString()
+                    .split("T")[0];
+
+            const selectedDate =
+                req.query.date || today;
+
+
+            // Date range
+            const startDate =
+                new Date(
+                    selectedDate + "T00:00:00.000Z"
+                );
+
+            const endDate =
+                new Date(
+                    selectedDate + "T23:59:59.999Z"
+                );
+
+
+            // Students who are absent
+            const students =
+                await Student.find({
+                    attendance: {
+                        $elemMatch: {
+                            date: {
+                                $gte: startDate,
+                                $lte: endDate
+                            },
+                            status: "Absent"
+                        }
+                    }
+                }).sort({
+                    name: 1
+                });
+
+
+            // Total students
+            const totalStudents =
+                await Student.countDocuments();
+
+
+            // Present count
+            const presentStudents =
+                await Student.countDocuments({
+                    attendance: {
+                        $elemMatch: {
+                            date: {
+                                $gte: startDate,
+                                $lte: endDate
+                            },
+                            status: "Present"
+                        }
+                    }
+                });
+
+
+            const absentStudents =
+                students.length;
+
+
+            // Attendance percentage
+            let attendancePercentage = 0;
+
+            if (totalStudents > 0) {
+
+                attendancePercentage =
+                    (
+                        presentStudents /
+                        totalStudents
+                    ) * 100;
+
+            }
+
+
+            res.render(
+                "absent-students",
+                {
+                    students,
+                    selectedDate,
+                    totalStudents,
+                    presentStudents,
+                    absentStudents,
+                    attendancePercentage:
+                        attendancePercentage.toFixed(2)
+                }
+            );
+
+
+        } catch (error) {
+
+            console.log(
+                "Absent Panel Error:",
+                error
+            );
+
+            res.status(500).send(
+                "Error loading absent students: " +
+                error.message
+            );
+
+        }
+
+    }
+);
 
 // ===============================
 // Server

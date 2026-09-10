@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Attendance</title>
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+<script src="/theme.js"></script>
+<body>
+
+    <div class="attendance-container">
+
+        <div class="attendance-header">
+
+            <div>
+                <h1>📋 Attendance</h1>
+                <p>Mark student attendance</p>
+            </div>
+            <a href="/attendance/absent" class="absent-panel-btn">
+                🔴 Absent Students
+            </a>
+
+            <a href="/students" class="back-btn">
+                ← Students
+            </a>
+
+        </div>
+
+
+        <form action="/attendance" method="POST">
+
+            <!-- Date -->
+
+            <div class="attendance-date">
+                <div class="date-label">
+                    <span class="date-icon">📅</span>
+                    <div>
+                        <label for="attendanceDate">Select Date</label>
+                        <small>Choose attendance date</small>
+                    </div>
+                </div>
+
+                <div class="date-input-wrapper">
+                    <input type="date" id="attendanceDate" name="date" value="<%= selectedDate %>" required>
+                </div>
+            </div>
+
+
+            <!-- Students -->
+
+            <div class="attendance-card">
+
+                <div class="attendance-table">
+
+                    <div class="attendance-row attendance-title">
+
+                        <div>
+                            Student
+                        </div>
+
+                        <div>
+                            Course
+                        </div>
+
+                        <div>
+                            Status
+                        </div>
+
+                    </div>
+
+
+                    <% students.forEach(function(student) { %>
+
+                        <div class="attendance-row">
+
+                            <div class="student-info">
+
+                                <% if (student.photo) { %>
+
+                                    <img src="<%= student.photo %>" class="attendance-photo">
+
+                                    <% } else { %>
+
+                                        <div class="attendance-photo no-photo">
+                                            👤
+                                        </div>
+
+                                        <% } %>
+
+
+                                            <div>
+                                                <strong>
+                                                    <%= student.name %>
+                                                </strong>
+
+                                                <small>
+                                                    <%= student.fatherName %>
+                                                </small>
+                                            </div>
+
+                            </div>
+
+
+                            <div>
+                                <%= student.course %>
+                            </div>
+
+
+                            <div class="attendance-status">
+
+                                <label class="present-label">
+
+                                    <input type="radio" name="attendance[<%= student._id %>]" value="Present"
+                                        <%=student.todayStatus==="Present" ? "checked" : "" %>
+                                    >
+
+                                    <span>
+                                        ✅ Present
+                                    </span>
+
+                                </label>
+
+
+                                <label class="absent-label">
+
+                                    <input type="radio" name="attendance[<%= student._id %>]" value="Absent"
+                                        <%=student.todayStatus==="Absent" ? "checked" : "" %>
+                                    >
+
+                                    <span>
+                                        ❌ Absent
+                                    </span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                        <% }); %>
+
+                </div>
+
+
+                <% if (students.length> 0) { %>
+
+                    <button type="submit" class="save-attendance-btn">
+                        💾 Save Attendance
+                    </button>
+
+                    <% } else { %>
+
+                        <p class="no-students">
+                            No students found.
+                        </p>
+
+                        <% } %>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</body>
+
+</html>

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/style.css">
 
 </head>
+<script src="/theme.js"></script>
 <script>
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -83,9 +84,9 @@
                 <button type="button" class="print-btn" onclick="window.print()">
                     🖨️ Print Report
                 </button>
-                <button type="button" class="pdf-btn" onclick="downloadPDF()">
+                <a href="/students/pdf/<%= student._id %>" class="pdf-btn">
                     📄 Download PDF
-                </button>
+                </a>
 
             </div>
 
@@ -215,6 +216,59 @@
         </div>
 
 
+        <!-- =================================
+     ATTENDANCE SUMMARY
+================================= -->
+
+        <div class="attendance-summary-card">
+
+            <div class="attendance-summary-header">
+
+                <div>
+                    <h2>📅 Attendance</h2>
+                    <p>Student attendance performance</p>
+                </div>
+
+                <div class="attendance-percentage">
+                    <strong>
+                        <%= attendance.percentage %>%
+                    </strong>
+                    <span>Attendance</span>
+                </div>
+
+            </div>
+
+
+            <div class="attendance-progress-fill" style="<%= 'width: ' + attendance.percentage + '%' %>"></div>
+
+
+            <div class="attendance-stats">
+
+                <div class="attendance-stat present">
+                    <span>✅ Present</span>
+                    <strong>
+                        <%= attendance.present %>
+                    </strong>
+                </div>
+
+                <div class="attendance-stat absent">
+                    <span>❌ Absent</span>
+                    <strong>
+                        <%= attendance.absent %>
+                    </strong>
+                </div>
+
+                <div class="attendance-stat total">
+                    <span>📊 Total Days</span>
+                    <strong>
+                        <%= attendance.total %>
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
 
         <!-- Overall Progress -->
 
@@ -246,6 +300,210 @@
                 </strong>
 
             </div>
+
+        </div>
+
+        <!-- ================================= -->
+        <!-- ATTENDANCE CALENDAR -->
+        <!-- ================================= -->
+
+        <div class="attendance-calendar-card">
+
+            <div class="attendance-calendar-header">
+
+                <div>
+                    <h2>🗓️ Attendance Calendar</h2>
+                    <p>View daily attendance status</p>
+                </div>
+
+                <div class="calendar-controls">
+
+                    <button type="button" id="previousMonth" class="calendar-nav-btn">
+                        ←
+                    </button>
+
+                    <strong id="calendarMonth"></strong>
+
+                    <button type="button" id="nextMonth" class="calendar-nav-btn">
+                        →
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="calendar-legend">
+
+                <span>
+                    <i class="legend-dot present"></i>
+                    Present
+                </span>
+
+                <span>
+                    <i class="legend-dot absent"></i>
+                    Absent
+                </span>
+
+                <span>
+                    <i class="legend-dot no-record"></i>
+                    No Record
+                </span>
+
+            </div>
+
+
+            <div class="attendance-calendar">
+
+                <div class="calendar-weekdays">
+
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+
+                </div>
+
+                <div id="calendarDays" class="calendar-days"></div>
+
+            </div>
+
+        </div>
+
+        <!-- ================================= -->
+        <!-- MONTHLY ATTENDANCE -->
+        <!-- ================================= -->
+
+        <div class="monthly-attendance-card">
+
+            <div class="monthly-attendance-header">
+                <div>
+                    <h2>📊 Monthly Attendance</h2>
+                    <p>View attendance month-wise</p>
+                </div>
+
+                <div>
+                    <input type="month" id="attendanceMonth" class="attendance-month-input">
+                </div>
+            </div>
+
+            <div class="monthly-attendance-stats">
+
+                <div class="monthly-stat">
+                    <span>📅 Total Days</span>
+                    <strong id="monthlyTotal">0</strong>
+                </div>
+
+                <div class="monthly-stat present">
+                    <span>✅ Present</span>
+                    <strong id="monthlyPresent">0</strong>
+                </div>
+
+                <div class="monthly-stat absent">
+                    <span>❌ Absent</span>
+                    <strong id="monthlyAbsent">0</strong>
+                </div>
+
+                <div class="monthly-stat percentage">
+                    <span>📈 Attendance</span>
+                    <strong id="monthlyPercentage">0%</strong>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- ================================= -->
+        <!-- ATTENDANCE HISTORY -->
+        <!-- ================================= -->
+
+        <div class="attendance-history-card">
+
+            <div class="attendance-history-header">
+                <div>
+                    <h2>📋 Attendance History</h2>
+                    <p>Date-wise attendance record</p>
+                </div>
+
+                <div class="attendance-filters">
+                    <button type="button" class="attendance-filter active" data-filter="all">
+                        All
+                    </button>
+
+                    <button type="button" class="attendance-filter" data-filter="Present">
+                        Present
+                    </button>
+
+                    <button type="button" class="attendance-filter" data-filter="Absent">
+                        Absent
+                    </button>
+                </div>
+            </div>
+
+            <% if (student.attendance && student.attendance.length> 0) { %>
+
+                <div class="attendance-history-table-wrapper">
+
+                    <table class="attendance-history-table">
+
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="attendanceHistoryBody">
+
+                            <% student.attendance .slice() .sort((a, b)=> new Date(b.date) - new Date(a.date))
+                                .forEach(record => { %>
+
+                                <tr class="attendance-history-row" data-status="<%= record.status %>">
+
+                                    <td>
+                                        <%= new Date(record.date).toLocaleDateString("en-IN", { day: "2-digit" ,
+                                            month: "short" , year: "numeric" }) %>
+                                    </td>
+
+                                    <td>
+
+                                        <% if (record.status==="Present" ) { %>
+
+                                            <span class="attendance-status present">
+                                                ✅ Present
+                                            </span>
+
+                                            <% } else { %>
+
+                                                <span class="attendance-status absent">
+                                                    ❌ Absent
+                                                </span>
+
+                                                <% } %>
+
+                                    </td>
+
+                                </tr>
+
+                                <% }) %>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <% } else { %>
+
+                    <div class="attendance-empty">
+                        <div>📅</div>
+                        <h3>No Attendance Record</h3>
+                        <p>Attendance has not been marked for this student yet.</p>
+                    </div>
+
+                    <% } %>
 
         </div>
 
@@ -498,13 +756,384 @@
         }, 300);
 
     });
-    function downloadPDF() {
 
-        window.print();
-
-    }
 
 </script>
+<script type="application/json" id="attendanceData">
+<%- JSON.stringify(student.attendance || []) %>
+</script>
+<script>
+    const attendanceData = JSON.parse(
+        document.getElementById("attendanceData").textContent
+    );
 
+
+
+    const attendanceMonth =
+        document.getElementById("attendanceMonth");
+
+    const monthlyTotal =
+        document.getElementById("monthlyTotal");
+
+    const monthlyPresent =
+        document.getElementById("monthlyPresent");
+
+    const monthlyAbsent =
+        document.getElementById("monthlyAbsent");
+
+    const monthlyPercentage =
+        document.getElementById("monthlyPercentage");
+
+
+    function updateMonthlyAttendance() {
+
+        const selectedMonth =
+            attendanceMonth.value;
+
+        if (!selectedMonth) {
+            return;
+        }
+
+        let present = 0;
+        let absent = 0;
+
+        attendanceData.forEach(record => {
+
+            const recordDate =
+                new Date(record.date);
+
+            const year =
+                recordDate.getFullYear();
+
+            const month =
+                String(recordDate.getMonth() + 1)
+                    .padStart(2, "0");
+
+            const recordMonth =
+                `${year}-${month}`;
+
+
+            if (recordMonth === selectedMonth) {
+
+                if (record.status === "Present") {
+                    present++;
+                }
+
+                if (record.status === "Absent") {
+                    absent++;
+                }
+
+            }
+
+        });
+
+
+        const total =
+            present + absent;
+
+
+        const percentage =
+            total > 0
+                ? ((present / total) * 100).toFixed(2)
+                : 0;
+
+
+        monthlyTotal.textContent =
+            total;
+
+        monthlyPresent.textContent =
+            present;
+
+        monthlyAbsent.textContent =
+            absent;
+
+        monthlyPercentage.textContent =
+            percentage + "%";
+    };
+
+
+    // Current month
+
+    const today =
+        new Date();
+
+    const currentMonth =
+        today.getFullYear() +
+        "-" +
+        String(today.getMonth() + 1)
+            .padStart(2, "0");
+
+
+    attendanceMonth.value =
+        currentMonth;
+
+
+    updateMonthlyAttendance();
+
+
+    attendanceMonth.addEventListener(
+        "change",
+        updateMonthlyAttendance
+    );
+
+    // =================================
+    // ATTENDANCE CALENDAR
+    // =================================
+
+    const calendarDays =
+        document.getElementById("calendarDays");
+
+    const calendarMonth =
+        document.getElementById("calendarMonth");
+
+    const previousMonth =
+        document.getElementById("previousMonth");
+
+    const nextMonth =
+        document.getElementById("nextMonth");
+
+
+    let calendarDate = new Date();
+
+
+    function renderAttendanceCalendar() {
+
+        const year =
+            calendarDate.getFullYear();
+
+        const month =
+            calendarDate.getMonth();
+
+
+        // Month name
+        calendarMonth.textContent =
+            calendarDate.toLocaleDateString(
+                "en-IN",
+                {
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+
+
+        // First day of month
+        const firstDay =
+            new Date(year, month, 1).getDay();
+
+
+        // Number of days
+        const daysInMonth =
+            new Date(year, month + 1, 0).getDate();
+
+
+        calendarDays.innerHTML = "";
+
+
+        // Empty boxes before first date
+        for (let i = 0; i < firstDay; i++) {
+
+            const emptyDay =
+                document.createElement("div");
+
+            emptyDay.className =
+                "calendar-day empty";
+
+            calendarDays.appendChild(emptyDay);
+        }
+
+
+        // Create dates
+        for (let day = 1; day <= daysInMonth; day++) {
+
+            const currentDay =
+                document.createElement("div");
+
+            currentDay.className =
+                "calendar-day";
+
+
+            const dateText =
+                `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+
+            // Find attendance record
+            const record =
+                attendanceData.find(item => {
+
+                    const recordDate =
+                        new Date(item.date);
+
+                    const recordYear =
+                        recordDate.getFullYear();
+
+                    const recordMonth =
+                        String(
+                            recordDate.getMonth() + 1
+                        ).padStart(2, "0");
+
+                    const recordDay =
+                        String(
+                            recordDate.getDate()
+                        ).padStart(2, "0");
+
+
+                    return (
+                        `${recordYear}-${recordMonth}-${recordDay}`
+                        === dateText
+                    );
+                });
+
+
+            // Date number
+            const dateNumber =
+                document.createElement("div");
+
+            dateNumber.className =
+                "calendar-date";
+
+            dateNumber.textContent =
+                day;
+
+            currentDay.appendChild(
+                dateNumber
+            );
+
+
+            // Attendance status
+            if (record) {
+
+                if (record.status === "Present") {
+
+                    currentDay.classList.add(
+                        "present"
+                    );
+
+                } else if (
+                    record.status === "Absent"
+                ) {
+
+                    currentDay.classList.add(
+                        "absent"
+                    );
+                }
+
+
+                const status =
+                    document.createElement("div");
+
+                status.className =
+                    "calendar-status";
+
+                status.textContent =
+                    record.status;
+
+                currentDay.appendChild(
+                    status
+                );
+            }
+
+
+            // Today
+            const today =
+                new Date();
+
+            if (
+                today.getFullYear() === year &&
+                today.getMonth() === month &&
+                today.getDate() === day
+            ) {
+
+                currentDay.classList.add(
+                    "today"
+                );
+            }
+
+
+            calendarDays.appendChild(
+                currentDay
+            );
+        }
+    }
+
+
+    // Previous month
+    previousMonth.addEventListener(
+        "click",
+        function () {
+
+            calendarDate.setMonth(
+                calendarDate.getMonth() - 1
+            );
+
+            renderAttendanceCalendar();
+        }
+    );
+
+
+    // Next month
+    nextMonth.addEventListener(
+        "click",
+        function () {
+
+            calendarDate.setMonth(
+                calendarDate.getMonth() + 1
+            );
+
+            renderAttendanceCalendar();
+        }
+    );
+
+
+    // First load
+    renderAttendanceCalendar();
+    // =================================
+    // ATTENDANCE HISTORY FILTER
+    // =================================
+
+    const attendanceFilters =
+        document.querySelectorAll(".attendance-filter");
+
+    const attendanceRows =
+        document.querySelectorAll(".attendance-history-row");
+
+
+    attendanceFilters.forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            const filter =
+                button.getAttribute("data-filter");
+
+
+            // Active button
+            attendanceFilters.forEach(function (btn) {
+                btn.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+
+            // Filter rows
+            attendanceRows.forEach(function (row) {
+
+                const status =
+                    row.getAttribute("data-status");
+
+                if (
+                    filter === "all" ||
+                    status === filter
+                ) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+
+            });
+
+        });
+
+    });
+
+</script>
 
 </html>

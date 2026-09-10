@@ -96,6 +96,19 @@ const studentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    attendance: [
+        {
+            date: {
+                type: Date,
+                required: true
+            },
+            status: {
+                type: String,
+                enum: ["Present", "Absent"],
+                required: true
+            }
+        }
+    ],
 
     // Exams
     exams: {
