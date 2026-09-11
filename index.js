@@ -590,57 +590,43 @@ function calculateStudentResult(student) {
 
 function calculateStudentRanking(students) {
 
-    const ranking =
-        students.map((student) => {
+    const ranking = students
+
+        // Sirf exam result wale students
+        .map((student) => {
 
             const result =
-                calculateStudentResult(
-                    student
-                );
-
+                calculateStudentResult(student);
 
             return {
-
                 student,
-
-                percentage:
-                    result.percentage,
-
-                grade:
-                    result.grade,
-
-                result:
-                    result.result
-
+                percentage: result.percentage,
+                grade: result.grade,
+                result: result.result,
+                totalMarks: result.totalMarks
             };
 
+        })
+
+        // Jinke marks nahi hain unko ranking se hatao
+        .filter((item) => {
+            return item.totalMarks > 0;
         });
 
 
     // Highest percentage first
     ranking.sort((a, b) => {
-
-        return (
-            b.percentage -
-            a.percentage
-        );
-
+        return b.percentage - a.percentage;
     });
 
 
-    // Assign rank
-    ranking.forEach(
-        (item, index) => {
-
-            item.rank =
-                index + 1;
-
-        }
-    );
+    // Rank assign
+    ranking.forEach((item, index) => {
+        item.rank = index + 1;
+    });
 
 
     return ranking;
-
 }
 
 
@@ -2484,7 +2470,7 @@ app.get(
 // ===============================
 
 app.post(
-    "/students/update/:id",
+    "/students/edit/:id",
     isAuthenticated,
     upload.single("photo"),
     async (req, res) => {
@@ -3539,7 +3525,104 @@ app.get(
     }
 );
 
+// =========================================
+// MONTHLY ATTENDANCE REPORT
+// =========================================
 
+app.get(
+    "/attendance/monthly",
+    isAuthenticated,
+    async (req, res) => {
+
+        try {
+
+            const month =
+                req.query.month ||
+                new Date().toISOString().slice(0, 7);
+
+            const [year, monthNumber] =
+                month.split("-").map(Number);
+
+            const students =
+                await Student.find();
+
+            const monthlyReport =
+                students.map((student) => {
+
+                    const attendance =
+                        student.attendance || [];
+
+                    const monthlyAttendance =
+                        attendance.filter((record) => {
+
+                            const date =
+                                new Date(record.date);
+
+                            return (
+                                date.getFullYear() === year &&
+                                date.getMonth() === monthNumber - 1
+                            );
+
+                        });
+
+                    const present =
+                        monthlyAttendance.filter(
+                            (record) =>
+                                record.status === "Present"
+                        ).length;
+
+                    const absent =
+                        monthlyAttendance.filter(
+                            (record) =>
+                                record.status === "Absent"
+                        ).length;
+
+                    const total =
+                        present + absent;
+
+                    const percentage =
+                        total > 0
+                            ? Number(
+                                (
+                                    (present / total) * 100
+                                ).toFixed(2)
+                            )
+                            : 0;
+
+                    return {
+                        student,
+                        present,
+                        absent,
+                        total,
+                        percentage
+                    };
+
+                });
+
+            res.render(
+                "monthly-attendance",
+                {
+                    monthlyReport,
+                    selectedMonth: month
+                }
+            );
+
+        } catch (error) {
+
+            console.log(
+                "Monthly Attendance Error:",
+                error
+            );
+
+            res.status(500).send(
+                "Error loading monthly attendance: " +
+                error.message
+            );
+
+        }
+
+    }
+);
 // ===============================
 // SERVER
 // ===============================

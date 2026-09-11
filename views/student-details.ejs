@@ -362,6 +362,86 @@
             </div>
 
         </div>
+        <!-- ================================= -->
+        <!-- PERFORMANCE CHART -->
+        <!-- ================================= -->
+
+        <div class="performance-chart-card">
+
+            <div class="performance-chart-header">
+                <div>
+                    <h2>📈 Examination Performance</h2>
+                    <p>Exam-wise performance overview</p>
+                </div>
+            </div>
+
+            <% if (student.exams && student.exams.length> 0) { %>
+
+                <div class="performance-chart">
+
+                    <% student.exams.forEach((exam)=> { %>
+
+                        <% let chartTotal=0; let chartObtained=0; if (exam.subjects && exam.subjects.length> 0) {
+
+                            exam.subjects.forEach((subject) => {
+
+                            chartTotal += Number(
+                            subject.totalMarks || 0
+                            );
+
+                            chartObtained += Number(
+                            subject.obtainedMarks || 0
+                            );
+
+                            });
+
+                            }
+
+                            const chartPercentage =
+                            chartTotal > 0
+                            ? Number(
+                            (
+                            (chartObtained / chartTotal) * 100
+                            ).toFixed(2)
+                            )
+                            : 0;
+                            %>
+
+                            <div class="performance-item">
+
+                                <div class="performance-item-header">
+
+                                    <strong>
+                                        📚 <%= exam.examName %>
+                                    </strong>
+
+                                    <span>
+                                        <%= chartPercentage %>%
+                                    </span>
+
+                                </div>
+
+                                <div class="performance-bar">
+
+                                    <div class="performance-fill" data-progress="<%= chartPercentage %>"></div>
+
+                                </div>
+
+                            </div>
+
+                            <% }) %>
+
+                </div>
+
+                <% } else { %>
+
+                    <div class="performance-no-data">
+                        📊 No examination data available.
+                    </div>
+
+                    <% } %>
+
+        </div>
 
         <!-- ================================= -->
         <!-- ATTENDANCE CALENDAR -->
@@ -806,6 +886,40 @@
             Math.max(
                 0,
                 Math.min(progress, 100)
+            );
+
+        setTimeout(function () {
+
+            bar.style.width =
+                safeProgress + "%";
+
+        }, 300);
+
+    });
+
+    // =================================
+    // EXAM PERFORMANCE CHART
+    // =================================
+
+    const performanceBars =
+        document.querySelectorAll(
+            ".performance-fill"
+        );
+
+    performanceBars.forEach(function (bar) {
+
+        const progress =
+            Number(
+                bar.dataset.progress || 0
+            );
+
+        const safeProgress =
+            Math.max(
+                0,
+                Math.min(
+                    progress,
+                    100
+                )
             );
 
         setTimeout(function () {

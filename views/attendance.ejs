@@ -26,6 +26,9 @@
             <a href="/attendance/absent" class="absent-panel-btn">
                 🔴 Absent Students
             </a>
+            <a href="/attendance/monthly" class="absent-panel-btn">
+                📊 Monthly Report
+            </a>
 
             <a href="/students" class="back-btn">
                 ← Students
@@ -164,11 +167,51 @@
                         <% } %>
 
             </div>
+            <!-- Bulk Attendance Controls -->
+            <div class="bulk-attendance-controls">
+
+                <div>
+                    <strong>⚡ Quick Attendance</strong>
+                    <small>Ek click me sabhi students ka status set karein</small>
+                </div>
+
+                <div class="bulk-attendance-buttons">
+
+                    <button type="button" class="bulk-present-btn" onclick="markAllAttendance('Present')">
+                        ✅ Mark All Present
+                    </button>
+
+                    <button type="button" class="bulk-absent-btn" onclick="markAllAttendance('Absent')">
+                        ❌ Mark All Absent
+                    </button>
+
+                </div>
+
+            </div>
 
         </form>
 
     </div>
+    <script>
 
+        function markAllAttendance(status) {
+
+            const radios = document.querySelectorAll(
+                '.attendance-status input[type="radio"]'
+            );
+
+            radios.forEach(function (radio) {
+
+                if (radio.value === status) {
+                    radio.checked = true;
+                }
+
+            });
+
+        }
+
+    </script>
 </body>
+
 
 </html>

@@ -31,20 +31,22 @@
             📥 Export Excel
         </a>
 
-        <!-- Search -->
-        <form action="/students" method="GET" class="search-form">
+        <!-- ===============================
+     SEARCH + FILTER
+================================ -->
 
-            <input type="text" name="search" placeholder="Search student..." value="<%= search %>">
+        <form action="/students" method="GET" class="student-filter-bar">
 
-            <button type="submit">
-                🔍 Search
-            </button>
+            <!-- Search -->
+            <div class="student-search-box">
 
-        </form>
+                <span>🔍</span>
 
+                <input type="text" name="search" placeholder="Search name, father name, mobile, email..."
+                    value="<%= search || '' %>">
 
-        <!-- Filter -->
-        <form action="/students" method="GET" class="filter-form">
+            </div>
+
 
             <!-- Course -->
             <select name="course">
@@ -55,21 +57,12 @@
 
                 <% courses.forEach((course)=> { %>
 
-                    <% if (selectedCourse===course) { %>
+                    <option value="<%= course %>" <%=selectedCourse===course ? "selected" : "" %>
+                        >
+                        <%= course %>
+                    </option>
 
-                        <option value="<%= course %>" selected>
-                            <%= course %>
-                        </option>
-
-                        <% } else { %>
-
-                            <option value="<%= course %>">
-                                <%= course %>
-                            </option>
-
-                            <% } %>
-
-                                <% }) %>
+                    <% }) %>
 
             </select>
 
@@ -83,32 +76,25 @@
 
                 <% addresses.forEach((address)=> { %>
 
-                    <% if (selectedAddress===address) { %>
+                    <option value="<%= address %>" <%=selectedAddress===address ? "selected" : "" %>
+                        >
+                        <%= address %>
+                    </option>
 
-                        <option value="<%= address %>" selected>
-                            <%= address %>
-                        </option>
-
-                        <% } else { %>
-
-                            <option value="<%= address %>">
-                                <%= address %>
-                            </option>
-
-                            <% } %>
-
-                                <% }) %>
+                    <% }) %>
 
             </select>
 
 
-            <button type="submit" class="filter">
-                🔎 Filter
+            <!-- Filter Button -->
+            <button type="submit" class="student-filter-btn">
+                🔎 Search / Filter
             </button>
 
 
-            <a href="/students" class="clear-btn">
-                Clear
+            <!-- Clear -->
+            <a href="/students" class="student-clear-btn">
+                ✖ Clear
             </a>
 
         </form>

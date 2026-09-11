@@ -331,7 +331,131 @@
 
         </div>
 
+        <!-- =========================================
+     TOP PERFORMERS
+========================================= -->
 
+        <div class="top-performers-section">
+
+            <div class="top-performers-header">
+
+                <div>
+                    <h2>🏆 Top Performers</h2>
+
+                    <p>
+                        Students with highest examination percentage
+                    </p>
+                </div>
+
+                <span class="top-performers-badge">
+                    Top 10
+                </span>
+
+            </div>
+
+
+            <% const topPerformers=(ranking || []) .filter(item=> item.percentage > 0)
+                .slice(0, 10);
+                %>
+
+
+                <% if (topPerformers.length> 0) { %>
+
+                    <div class="top-performers-list">
+
+                        <% topPerformers.forEach((item, index)=> { %>
+
+                            <div class="top-performer-card">
+
+                                <!-- Rank -->
+
+                                <div class="performer-rank">
+
+                                    <% if (index===0) { %>
+                                        🥇
+                                        <% } else if (index===1) { %>
+                                            🥈
+                                            <% } else if (index===2) { %>
+                                                🥉
+                                                <% } else { %>
+                                                    #<%= item.rank %>
+                                                        <% } %>
+
+                                </div>
+
+
+                                <!-- Student -->
+
+                                <div class="performer-info">
+
+                                    <div class="performer-avatar">
+
+                                        <% if (item.student.photo) { %>
+
+                                            <img src="<%= item.student.photo %>" alt="Student Photo">
+
+                                            <% } else { %>
+
+                                                👤
+
+                                                <% } %>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <h3>
+                                            <%= item.student.name %>
+                                        </h3>
+
+                                        <p>
+                                            <%= item.student.course || "Course not available" %>
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Performance -->
+
+                                <div class="performer-result">
+
+                                    <strong>
+                                        <%= item.percentage %>%
+                                    </strong>
+
+                                    <span>
+                                        Grade: <%= item.grade %>
+                                    </span>
+
+                                </div>
+
+
+                                <!-- View -->
+
+                                <a href="/students/view/<%= item.student._id %>" class="performer-view-btn">
+                                    View
+                                </a>
+
+                            </div>
+
+                            <% }) %>
+
+                    </div>
+
+                    <% } else { %>
+
+                        <div class="top-performers-no-data">
+
+                            🏆 No examination results available yet.
+
+                        </div>
+
+                        <% } %>
+
+        </div>
 
         <!-- QUICK ACTIONS -->
 

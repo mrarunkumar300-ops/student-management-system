@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Monthly Attendance Report</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+    <script src="/theme.js"></script>
+
+</head>
+
+<body>
+
+<div class="monthly-attendance-container">
+
+    <!-- Header -->
+
+    <div class="monthly-attendance-header">
+
+        <div>
+
+            <h1>📅 Monthly Attendance Report</h1>
+
+            <p>
+                Student-wise monthly attendance
+            </p>
+
+        </div>
+
+        <div>
+
+            <a
+                href="/attendance"
+                class="back-btn"
+            >
+                ← Attendance
+            </a>
+
+            <a
+                href="/students"
+                class="back-btn"
+            >
+                ← Students
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Month Selection -->
+
+    <form
+        action="/attendance/monthly"
+        method="GET"
+        class="monthly-attendance-filter"
+    >
+
+        <div>
+
+            <label for="month">
+                Select Month
+            </label>
+
+            <input
+                type="month"
+                id="month"
+                name="month"
+                value="<%= selectedMonth %>"
+                required
+            >
+
+        </div>
+
+        <button type="submit">
+            🔎 View Report
+        </button>
+
+    </form>
+
+
+    <!-- Report -->
+
+    <div class="monthly-attendance-card">
+
+        <div class="monthly-attendance-title">
+
+            <div>
+
+                <h2>
+                    📊 Attendance Summary
+                </h2>
+
+                <p>
+                    <%= selectedMonth %>
+                </p>
+
+            </div>
+
+            <span>
+                <%= monthlyReport.length %> Students
+            </span>
+
+        </div>
+
+
+        <% if (monthlyReport.length > 0) { %>
+
+            <div class="monthly-table-wrapper">
+
+                <table class="monthly-attendance-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Student</th>
+
+                            <th>Course</th>
+
+                            <th>Present</th>
+
+                            <th>Absent</th>
+
+                            <th>Total</th>
+
+                            <th>Attendance</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <% monthlyReport.forEach((item, index) => { %>
+
+                            <tr>
+
+                                <td>
+                                    <%= index + 1 %>
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        <%= item.student.name %>
+                                    </strong>
+
+                                </td>
+
+                                <td>
+                                    <%= item.student.course || "-" %>
+                                </td>
+
+                                <td class="monthly-present">
+                                    <%= item.present %>
+                                </td>
+
+                                <td class="monthly-absent">
+                                    <%= item.absent %>
+                                </td>
+
+                                <td>
+                                    <%= item.total %>
+                                </td>
+
+                                <td>
+
+                                    <div class="monthly-progress">
+
+                                        <div class="monthly-progress-bar">
+
+                                            <div
+                                                class="monthly-progress-fill"
+                                                style="width: <%= item.percentage %>%"
+                                            ></div>
+
+                                        </div>
+
+                                        <strong>
+                                            <%= item.percentage %>%
+                                        </strong>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        <% }) %>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        <% } else { %>
+
+            <div class="monthly-no-data">
+
+                📊 No attendance data available.
+
+            </div>
+
+        <% } %>
+
+    </div>
+
+</div>
+
+</body>
+
+</html> 
