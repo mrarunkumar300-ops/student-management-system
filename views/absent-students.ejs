@@ -2,252 +2,241 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Absent Students</title>
 
     <link rel="stylesheet" href="/style.css">
+
+    <script src="/theme.js"></script>
+
 </head>
-<script src="/theme.js"></script>
 
 <body>
 
-<div class="absent-container">
+    <div class="absent-container">
 
-    <div class="absent-header">
+        <div class="absent-header">
 
-        <div>
-            <h1>🔴 Absent Students</h1>
-            <p>Selected date ke absent students</p>
-        </div>
+            <div>
+                <h1>🔴 Absent Students</h1>
+                <p>Selected date ke absent students</p>
+            </div>
 
-        <div class="absent-actions">
+            <div class="absent-actions">
 
-            <a href="/attendance" class="attendance-back-btn">
-                📋 Attendance
-            </a>
+                <a href="/attendance" class="attendance-back-btn">
+                    📋 Attendance
+                </a>
 
-            <a href="/students" class="attendance-back-btn">
-                ← Students
-            </a>
+                <a href="/students" class="attendance-back-btn">
+                    ← Students
+                </a>
 
-        </div>
-
-    </div>
-
-
-    <!-- Date -->
-
-    <form
-        action="/attendance/absent"
-        method="GET"
-        class="absent-date-form"
-    >
-
-        <label>Select Date</label>
-
-        <input
-            type="date"
-            name="date"
-            value="<%= selectedDate %>"
-            required
-        >
-
-        <button type="submit">
-            🔍 Check
-        </button>
-
-    </form>
-
-
-    <!-- Statistics -->
-
-    <div class="absent-stats">
-
-        <div class="absent-stat-card">
-
-            <span>👥 Total Students</span>
-
-            <strong>
-                <%= totalStudents %>
-            </strong>
+            </div>
 
         </div>
 
 
-        <div class="absent-stat-card present-stat">
+        <!-- Date -->
 
-            <span>✅ Present</span>
+        <form action="/attendance/absent" method="GET" class="absent-date-form">
 
-            <strong>
-                <%= presentStudents %>
-            </strong>
+            <label>Select Date</label>
+
+            <input type="date" name="date" value="<%= selectedDate %>" required>
+
+            <button type="submit">
+                🔍 Check
+            </button>
+
+        </form>
+
+
+        <!-- Statistics -->
+
+        <div class="absent-stats">
+
+            <div class="absent-stat-card">
+
+                <span>👥 Total Students</span>
+
+                <strong>
+                    <%= totalStudents %>
+                </strong>
+
+            </div>
+
+
+            <div class="absent-stat-card present-stat">
+
+                <span>✅ Present</span>
+
+                <strong>
+                    <%= presentStudents %>
+                </strong>
+
+            </div>
+
+
+            <div class="absent-stat-card absent-stat">
+
+                <span>❌ Absent</span>
+
+                <strong>
+                    <%= absentStudents %>
+                </strong>
+
+            </div>
+
+
+            <div class="absent-stat-card">
+
+                <span>📊 Attendance</span>
+
+                <strong>
+                    <%= attendancePercentage %>%
+                </strong>
+
+            </div>
 
         </div>
 
 
-        <div class="absent-stat-card absent-stat">
+        <!-- Absent Students -->
 
-            <span>❌ Absent</span>
+        <div class="absent-card">
 
-            <strong>
-                <%= absentStudents %>
-            </strong>
+            <div class="absent-card-title">
 
-        </div>
+                <h2>❌ Absent Students</h2>
 
+                <span>
+                    <%= absentStudents %> Students
+                </span>
 
-        <div class="absent-stat-card">
-
-            <span>📊 Attendance</span>
-
-            <strong>
-                <%= attendancePercentage %>%
-            </strong>
-
-        </div>
-
-    </div>
+            </div>
 
 
-    <!-- Absent Students -->
+            <% if (students.length> 0) { %>
 
-    <div class="absent-card">
+                <div class="absent-table-wrapper">
 
-        <div class="absent-card-title">
+                    <table class="absent-table">
 
-            <h2>❌ Absent Students</h2>
-
-            <span>
-                <%= absentStudents %> Students
-            </span>
-
-        </div>
-
-
-        <% if (students.length > 0) { %>
-
-            <div class="absent-table-wrapper">
-
-                <table class="absent-table">
-
-                    <thead>
-
-                        <tr>
-                            <th>Photo</th>
-                            <th>Student Name</th>
-                            <th>Father Name</th>
-                            <th>Mobile</th>
-                            <th>Course</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        <% students.forEach(function(student) { %>
+                        <thead>
 
                             <tr>
-
-                                <td>
-
-                                    <% if (student.photo) { %>
-
-                                        <img
-                                            src="<%= student.photo %>"
-                                            class="absent-student-photo"
-                                        >
-
-                                    <% } else { %>
-
-                                        <div class="absent-no-photo">
-                                            👤
-                                        </div>
-
-                                    <% } %>
-
-                                </td>
-
-
-                                <td>
-                                    <strong>
-                                        <%= student.name %>
-                                    </strong>
-                                </td>
-
-
-                                <td>
-                                    <%= student.fatherName || "-" %>
-                                </td>
-
-
-                                <td>
-                                    <%= student.mobile || "-" %>
-                                </td>
-
-
-                                <td>
-                                    <%= student.course || "-" %>
-                                </td>
-
-
-                                <td>
-
-                                    <span class="absent-badge">
-                                        ❌ Absent
-                                    </span>
-
-                                </td>
-
-
-                                <td>
-
-                                    <a
-                                        href="/students/view/<%= student._id %>"
-                                        class="absent-view-btn"
-                                    >
-                                        👁️ View
-                                    </a>
-
-                                </td>
-
+                                <th>Photo</th>
+                                <th>Student Name</th>
+                                <th>Father Name</th>
+                                <th>Mobile</th>
+                                <th>Course</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
 
-                        <% }); %>
+                        </thead>
 
-                    </tbody>
 
-                </table>
+                        <tbody>
 
-            </div>
+                            <% students.forEach(function(student) { %>
 
-        <% } else { %>
+                                <tr>
 
-            <div class="no-absent">
+                                    <td>
 
-                <div class="no-absent-icon">
-                    🎉
+                                        <% if (student.photo) { %>
+
+                                            <img src="<%= student.photo %>" class="absent-student-photo">
+
+                                            <% } else { %>
+
+                                                <div class="absent-no-photo">
+                                                    👤
+                                                </div>
+
+                                                <% } %>
+
+                                    </td>
+
+
+                                    <td>
+                                        <strong>
+                                            <%= student.name %>
+                                        </strong>
+                                    </td>
+
+
+                                    <td>
+                                        <%= student.fatherName || "-" %>
+                                    </td>
+
+
+                                    <td>
+                                        <%= student.mobile || "-" %>
+                                    </td>
+
+
+                                    <td>
+                                        <%= student.course || "-" %>
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="absent-badge">
+                                            ❌ Absent
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <a href="/students/view/<%= student._id %>" class="absent-view-btn">
+                                            👁️ View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                                <% }); %>
+
+                        </tbody>
+
+                    </table>
+
                 </div>
 
-                <h3>
-                    No Absent Students
-                </h3>
+                <% } else { %>
 
-                <p>
-                    Is date par koi student absent nahi hai.
-                </p>
+                    <div class="no-absent">
 
-            </div>
+                        <div class="no-absent-icon">
+                            🎉
+                        </div>
 
-        <% } %>
+                        <h3>
+                            No Absent Students
+                        </h3>
+
+                        <p>
+                            Is date par koi student absent nahi hai.
+                        </p>
+
+                    </div>
+
+                    <% } %>
+
+        </div>
 
     </div>
-
-</div>
 
 </body>
 

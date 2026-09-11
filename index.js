@@ -8,6 +8,7 @@ require("dotenv").config();
 // ===============================
 // Packages
 // ===============================
+
 const ExcelJS = require("exceljs");
 const express = require("express");
 const PDFDocument = require("pdfkit");
@@ -355,6 +356,7 @@ function calculateStudentProgress(
 
 }
 
+
 // =================================
 // Calculate Attendance Percentage
 // =================================
@@ -362,7 +364,9 @@ function calculateStudentProgress(
 function calculateAttendance(student) {
 
     let present = 0;
+
     let absent = 0;
+
 
     if (
         student.attendance &&
@@ -372,35 +376,54 @@ function calculateAttendance(student) {
         student.attendance.forEach((record) => {
 
             if (record.status === "Present") {
+
                 present++;
+
             }
 
+
             if (record.status === "Absent") {
+
                 absent++;
+
             }
 
         });
 
     }
 
-    const total = present + absent;
+
+    const total =
+        present + absent;
 
     let percentage = 0;
 
+
     if (total > 0) {
+
         percentage =
             (present / total) * 100;
+
     }
 
+
     return {
+
         present,
+
         absent,
+
         total,
-        percentage: Number(
-            percentage.toFixed(2)
-        )
+
+        percentage:
+            Number(
+                percentage.toFixed(2)
+            )
+
     };
+
 }
+
 
 // ===============================
 // Add Progress
@@ -433,10 +456,197 @@ function addProgressToStudents(
 }
 
 
+// ===============================
+// Calculate Student Result
+// ===============================
+
+function calculateStudentResult(student) {
+
+    let totalMarks = 0;
+
+    let obtainedMarks = 0;
+
+
+    if (
+        student.exams &&
+        student.exams.length > 0
+    ) {
+
+        student.exams.forEach((exam) => {
+
+            if (
+                exam.subjects &&
+                exam.subjects.length > 0
+            ) {
+
+                exam.subjects.forEach((subject) => {
+
+                    totalMarks +=
+                        Number(
+                            subject.totalMarks
+                        ) || 0;
+
+                    obtainedMarks +=
+                        Number(
+                            subject.obtainedMarks
+                        ) || 0;
+
+                });
+
+            }
+
+        });
+
+    }
+
+
+    let percentage = 0;
+
+
+    if (totalMarks > 0) {
+
+        percentage =
+            (obtainedMarks /
+                totalMarks) *
+            100;
+
+    }
+
+
+    percentage =
+        Number(
+            percentage.toFixed(2)
+        );
+
+
+    let grade = "N/A";
+
+
+    if (totalMarks > 0) {
+
+        if (percentage >= 90) {
+
+            grade = "A+";
+
+        } else if (percentage >= 80) {
+
+            grade = "A";
+
+        } else if (percentage >= 70) {
+
+            grade = "B+";
+
+        } else if (percentage >= 60) {
+
+            grade = "B";
+
+        } else if (percentage >= 50) {
+
+            grade = "C";
+
+        } else if (percentage >= 33) {
+
+            grade = "D";
+
+        } else {
+
+            grade = "F";
+
+        }
+
+    }
+
+
+    const result =
+        totalMarks > 0
+            ? (
+                percentage >= 33
+                    ? "PASS"
+                    : "FAIL"
+            )
+            : "N/A";
+
+
+    return {
+
+        totalMarks,
+
+        obtainedMarks,
+
+        percentage,
+
+        grade,
+
+        result
+
+    };
+
+}
+
+
+// =========================================
+// AUTOMATIC STUDENT RANKING
+// =========================================
+
+function calculateStudentRanking(students) {
+
+    const ranking =
+        students.map((student) => {
+
+            const result =
+                calculateStudentResult(
+                    student
+                );
+
+
+            return {
+
+                student,
+
+                percentage:
+                    result.percentage,
+
+                grade:
+                    result.grade,
+
+                result:
+                    result.result
+
+            };
+
+        });
+
+
+    // Highest percentage first
+    ranking.sort((a, b) => {
+
+        return (
+            b.percentage -
+            a.percentage
+        );
+
+    });
+
+
+    // Assign rank
+    ranking.forEach(
+        (item, index) => {
+
+            item.rank =
+                index + 1;
+
+        }
+    );
+
+
+    return ranking;
+
+}
+
+
 // ==================================================
 // LOGIN / DASHBOARD
 // ==================================================
-
 
 // ===============================
 // Dashboard
@@ -449,74 +659,66 @@ app.get(
 
         try {
 
+            // Total Students
             const totalStudents =
                 await Student.countDocuments();
 
 
+            // Courses
             const courses =
-                await Student.distinct(
-                    "course"
-                );
+                await Student.distinct("course");
 
 
+            // Addresses
             const addresses =
-                await Student.distinct(
-                    "address"
-                );
+                await Student.distinct("address");
 
 
+            // Course Counts
             const courseCounts =
                 await Student.aggregate([
 
                     {
                         $group: {
-
                             _id: "$course",
-
                             count: {
                                 $sum: 1
                             }
-
                         }
-
                     },
 
                     {
                         $sort: {
                             count: -1
                         }
-
                     }
 
                 ]);
 
 
+            // Address Counts
             const addressCounts =
                 await Student.aggregate([
 
                     {
                         $group: {
-
                             _id: "$address",
-
                             count: {
                                 $sum: 1
                             }
-
                         }
-
                     },
 
                     {
                         $sort: {
                             count: -1
                         }
-
                     }
 
                 ]);
 
 
+            // Exam Counts
             const examCounts =
                 await Student.aggregate([
 
@@ -526,53 +728,51 @@ app.get(
 
                     {
                         $group: {
-
                             _id:
                                 "$exams.examName",
-
                             count: {
                                 $sum: 1
                             }
-
                         }
-
                     },
 
                     {
                         $sort: {
                             count: -1
                         }
-
                     }
 
                 ]);
 
 
+            // All Students
             const allStudents =
                 await Student.find();
 
 
+            // Automatic Ranking
+            const ranking =
+                calculateStudentRanking(
+                    allStudents
+                );
+
+
+            // Average Progress
             let totalProgress = 0;
 
+            allStudents.forEach((student) => {
 
-            allStudents.forEach(
-                (student) => {
+                totalProgress +=
+                    calculateStudentProgress(
+                        student
+                    );
 
-                    totalProgress +=
-                        calculateStudentProgress(
-                            student
-                        );
-
-                }
-            );
+            });
 
 
             let averageProgress = 0;
 
-
-            if (
-                allStudents.length > 0
-            ) {
+            if (allStudents.length > 0) {
 
                 averageProgress =
                     Number(
@@ -585,6 +785,7 @@ app.get(
             }
 
 
+            // Render Dashboard
             res.render(
                 "dashboard",
                 {
@@ -603,7 +804,9 @@ app.get(
 
                     examCounts,
 
-                    averageProgress
+                    averageProgress,
+
+                    ranking
 
                 }
             );
@@ -616,7 +819,6 @@ app.get(
                 error
             );
 
-
             res.status(500).send(
                 "Error loading dashboard: " +
                 error.message
@@ -627,9 +829,10 @@ app.get(
     }
 );
 
-// =========================================
+
+// ==================================================
 // EXPORT STUDENTS TO EXCEL
-// =========================================
+// ==================================================
 
 app.get(
     "/students/export",
@@ -655,7 +858,6 @@ app.get(
 
 
             // Columns
-
             worksheet.columns = [
 
                 {
@@ -714,279 +916,97 @@ app.get(
 
             ];
 
-            // =========================================
-            // ATTENDANCE
-            // =========================================
+
+            // Add Students
+            students.forEach((student) => {
+
+                const progress =
+                    calculateStudentProgress(
+                        student
+                    );
 
 
-            // Attendance Page
-
-            app.get(
-                "/attendance",
-                isAuthenticated,
-                async (req, res) => {
-
-                    try {
-
-                        // Today's date
-
-                        const today = new Date();
-
-                        const selectedDate =
-                            req.query.date ||
-                            today.toISOString().split("T")[0];
+                let examText = "";
 
 
-                        const students =
-                            await Student.find()
-                                .sort({ name: 1 });
+                if (
+                    student.exams &&
+                    student.exams.length > 0
+                ) {
 
+                    student.exams.forEach(
+                        (exam) => {
 
-                        // Check attendance for selected date
-
-                        students.forEach((student) => {
-
-                            student.todayStatus = "";
-
-                            if (
-                                student.attendance &&
-                                student.attendance.length > 0
-                            ) {
-
-                                const record =
-                                    student.attendance.find(
-                                        (item) => {
-
-                                            const itemDate =
-                                                new Date(item.date)
-                                                    .toISOString()
-                                                    .split("T")[0];
-
-                                            return (
-                                                itemDate ===
-                                                selectedDate
-                                            );
-
-                                        }
-                                    );
-
-
-                                if (record) {
-
-                                    student.todayStatus =
-                                        record.status;
-
-                                }
-
-                            }
-
-                        });
-
-
-                        res.render(
-                            "attendance",
-                            {
-                                students,
-                                selectedDate
-                            }
-                        );
-
-
-                    } catch (error) {
-
-                        console.log(
-                            "Attendance Page Error:",
-                            error
-                        );
-
-                        res.status(500).send(
-                            "Error loading attendance: " +
-                            error.message
-                        );
-
-                    }
-
-                }
-            );
-
-            // Save Attendance
-
-            app.post(
-                "/attendance",
-                isAuthenticated,
-                async (req, res) => {
-
-                    try {
-
-                        const {
-                            date,
-                            attendance
-                        } = req.body;
-
-
-                        if (!date) {
-
-                            return res.status(400).send(
-                                "Please select a date"
-                            );
-
-                        }
-
-
-                        if (!attendance) {
-
-                            return res.status(400).send(
-                                "Please mark attendance"
-                            );
-
-                        }
-
-
-                        // Save each student's attendance
-
-                        for (
-                            const studentId in attendance
-                        ) {
-
-                            const status =
-                                attendance[studentId];
+                            examText +=
+                                exam.examName +
+                                ": ";
 
 
                             if (
-                                status !== "Present" &&
-                                status !== "Absent"
+                                exam.subjects &&
+                                exam.subjects.length > 0
                             ) {
-                                continue;
-                            }
 
+                                exam.subjects.forEach(
+                                    (subject) => {
 
-                            const student =
-                                await Student.findById(
-                                    studentId
-                                );
-
-
-                            if (!student) {
-                                continue;
-                            }
-
-
-                            // Convert selected date
-
-                            const selectedDate =
-                                new Date(date);
-
-
-                            selectedDate.setHours(
-                                0,
-                                0,
-                                0,
-                                0
-                            );
-
-
-                            // Check if attendance already exists
-
-                            const existingRecord =
-                                student.attendance.find(
-                                    (item) => {
-
-                                        const itemDate =
-                                            new Date(item.date);
-
-                                        itemDate.setHours(
-                                            0,
-                                            0,
-                                            0,
-                                            0
-                                        );
-
-                                        return (
-                                            itemDate.getTime() ===
-                                            selectedDate.getTime()
-                                        );
+                                        examText +=
+                                            subject.subjectName +
+                                            " (" +
+                                            subject.obtainedMarks +
+                                            "/" +
+                                            subject.totalMarks +
+                                            "), ";
 
                                     }
                                 );
 
-
-                            if (existingRecord) {
-
-                                // Update existing attendance
-
-                                existingRecord.status =
-                                    status;
-
-                            } else {
-
-                                // Add new attendance
-
-                                student.attendance.push({
-
-                                    date: selectedDate,
-
-                                    status: status
-
-                                });
-
                             }
 
 
-                            await student.save();
+                            examText += "\n";
 
                         }
-
-
-                        res.redirect(
-                            "/attendance?date=" +
-                            encodeURIComponent(date)
-                        );
-
-
-                    } catch (error) {
-
-                        console.log(
-                            "Save Attendance Error:",
-                            error
-                        );
-
-                        res.status(500).send(
-                            "Error saving attendance: " +
-                            error.message
-                        );
-
-                    }
+                    );
 
                 }
-            );
-            // =========================================
-            // ATTENDANCE TEST
-            // =========================================
 
-            app.get("/attendance", isAuthenticated, (req, res) => {
-                res.send("Attendance page working!");
+
+                worksheet.addRow({
+
+                    name:
+                        student.name,
+
+                    fatherName:
+                        student.fatherName,
+
+                    mobile:
+                        student.mobile,
+
+                    email:
+                        student.email,
+
+                    age:
+                        student.age,
+
+                    course:
+                        student.course,
+
+                    address:
+                        student.address,
+
+                    progress:
+                        progress + "%",
+
+                    exams:
+                        examText
+
+                });
+
             });
 
-            // Add students
 
-            const progress =
-                calculateStudentProgress(student);
-
-            const attendance =
-                calculateAttendance(student);
-
-            res.render(
-                "student-details",
-                {
-                    student,
-                    progress,
-                    attendance
-                }
-            );
-
-
-            // Header style
-
+            // Header Style
             const headerRow =
                 worksheet.getRow(1);
 
@@ -997,8 +1017,11 @@ app.get(
 
 
             headerRow.alignment = {
+
                 vertical: "middle",
+
                 horizontal: "center"
+
             };
 
 
@@ -1006,7 +1029,6 @@ app.get(
 
 
             // Borders
-
             worksheet.eachRow(
                 function (row) {
 
@@ -1033,13 +1055,12 @@ app.get(
 
                             };
 
+
                             cell.alignment = {
 
-                                vertical:
-                                    "top",
+                                vertical: "top",
 
-                                wrapText:
-                                    true
+                                wrapText: true
 
                             };
 
@@ -1050,20 +1071,21 @@ app.get(
             );
 
 
-            // Freeze header
-
+            // Freeze Header
             worksheet.views = [
 
                 {
+
                     state: "frozen",
+
                     ySplit: 1
+
                 }
 
             ];
 
 
             // Download
-
             res.setHeader(
                 "Content-Type",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -1117,13 +1139,9 @@ app.get("/", (req, res) => {
 // STUDENTS LIST
 // ==================================================
 
-
-// ===============================
-// Students List
-// ===============================
-
 app.get(
     "/students",
+    isAuthenticated,
     async (req, res) => {
 
         try {
@@ -1195,6 +1213,7 @@ app.get(
             }
 
 
+            // Course Filter
             if (course) {
 
                 filter.course =
@@ -1203,6 +1222,7 @@ app.get(
             }
 
 
+            // Address Filter
             if (address) {
 
                 filter.address =
@@ -1332,8 +1352,7 @@ app.post(
             } = req.body;
 
 
-            // Basic validation
-
+            // Basic Validation
             if (
                 !name ||
                 !fatherName ||
@@ -1351,8 +1370,7 @@ app.post(
             }
 
 
-            // Age
-
+            // Age Validation
             if (
                 Number(age) < 1 ||
                 Number(age) > 100
@@ -1365,8 +1383,7 @@ app.post(
             }
 
 
-            // Mobile
-
+            // Mobile Validation
             if (
                 !/^[0-9]{10}$/.test(
                     mobile
@@ -1528,7 +1545,7 @@ app.post(
 
 
             // ===============================
-            // Create
+            // Create Student
             // ===============================
 
             await Student.create({
@@ -1585,35 +1602,78 @@ app.post(
 // STUDENT DETAILS PAGE
 // ==================================================
 
+app.get(
+    "/students/view/:id",
+    isAuthenticated,
+    async (req, res) => {
 
-// ===============================
-// View Student
-// ===============================
-app.get("/students/view/:id", async (req, res) => {
-    try {
-        const student = await Student.findById(req.params.id);
+        try {
 
-        if (!student) {
-            return res.status(404).send("Student not found");
+            const student =
+                await Student.findById(
+                    req.params.id
+                );
+
+
+            if (!student) {
+
+                return res
+                    .status(404)
+                    .send(
+                        "Student not found"
+                    );
+
+            }
+
+
+            const progress =
+                calculateStudentProgress(
+                    student
+                );
+
+
+            const attendance =
+                calculateAttendance(
+                    student
+                );
+
+
+            const result =
+                calculateStudentResult(
+                    student
+                );
+
+
+            res.render(
+                "student-details",
+                {
+
+                    student,
+
+                    progress,
+
+                    attendance,
+
+                    result
+
+                }
+            );
+
+
+        } catch (error) {
+
+            console.log(error);
+
+
+            res.status(500).send(
+                "Server Error"
+            );
+
         }
 
-        const progress =
-            calculateStudentProgress(student);
-
-        const attendance =
-            calculateAttendance(student);
-
-        res.render("student-details", {
-            student,
-            progress,
-            attendance
-        });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Server Error");
     }
-});
+);
+
 // =========================================
 // PROFESSIONAL STUDENT PDF
 // =========================================
@@ -1625,82 +1685,73 @@ app.get(
 
         try {
 
-            const student = await Student.findById(
-                req.params.id
-            );
+            const student =
+                await Student.findById(
+                    req.params.id
+                );
+
 
             if (!student) {
-                return res.status(404).send(
-                    "Student not found"
-                );
+
+                return res
+                    .status(404)
+                    .send("Student not found");
+
             }
+
 
             const progress =
-                calculateStudentProgress(student);
+                calculateStudentProgress(
+                    student
+                );
+
+
             const attendance =
-                calculateAttendance(student);
+                calculateAttendance(
+                    student
+                );
+
+
+            const result =
+                calculateStudentResult(
+                    student
+                );
+
 
             // =================================
-            // Calculate Total / Obtained Marks
-            // =================================
-
-            let totalMarks = 0;
-            let obtainedMarks = 0;
-
-            if (
-                student.exams &&
-                student.exams.length > 0
-            ) {
-
-                student.exams.forEach((exam) => {
-
-                    if (
-                        exam.subjects &&
-                        exam.subjects.length > 0
-                    ) {
-
-                        exam.subjects.forEach((subject) => {
-
-                            totalMarks += Number(
-                                subject.totalMarks || 0
-                            );
-
-                            obtainedMarks += Number(
-                                subject.obtainedMarks || 0
-                            );
-
-                        });
-
-                    }
-
-                });
-
-            }
-
-            // =================================
-            // PDF
+            // PDF DOCUMENT
             // =================================
 
             const PDFDocument =
                 require("pdfkit");
 
-            const doc = new PDFDocument({
-                size: "A4",
-                margin: 40,
-                bufferPages: true
-            });
+
+            const doc =
+                new PDFDocument({
+
+                    size: "A4",
+
+                    margin: 40,
+
+                    bufferPages: true
+
+                });
+
 
             res.setHeader(
                 "Content-Type",
                 "application/pdf"
             );
 
+
             res.setHeader(
                 "Content-Disposition",
                 `attachment; filename="${student.name}-student-report.pdf"`
             );
 
+
             doc.pipe(res);
+
 
             // =================================
             // HEADER
@@ -1716,10 +1767,13 @@ app.get(
                     }
                 );
 
+
+            doc.moveDown(0.3);
+
+
             doc
-                .moveDown(0.3)
                 .font("Helvetica")
-                .fontSize(12)
+                .fontSize(11)
                 .text(
                     "Student Academic Report",
                     {
@@ -1727,23 +1781,28 @@ app.get(
                     }
                 );
 
+
             doc.moveDown(1);
 
-            // Header line
+
+            // Line
             doc
                 .moveTo(40, doc.y)
                 .lineTo(555, doc.y)
                 .stroke();
 
+
             doc.moveDown(1);
 
+
             // =================================
-            // PHOTO + BASIC DETAILS
+            // STUDENT PHOTO
             // =================================
 
-            const startY = doc.y;
+            const startY =
+                doc.y;
 
-            // Photo box
+
             if (student.photo) {
 
                 try {
@@ -1751,8 +1810,11 @@ app.get(
                     let photoUrl =
                         student.photo;
 
-                    // Convert Cloudinary image to JPG
+
                     if (
+                        photoUrl.includes(
+                            "cloudinary.com"
+                        ) &&
                         photoUrl.includes(
                             "/upload/"
                         )
@@ -1766,8 +1828,12 @@ app.get(
 
                     }
 
+
                     const response =
-                        await fetch(photoUrl);
+                        await fetch(
+                            photoUrl
+                        );
+
 
                     if (response.ok) {
 
@@ -1776,14 +1842,22 @@ app.get(
                                 await response.arrayBuffer()
                             );
 
+
                         doc.image(
                             imageBuffer,
                             430,
                             startY,
                             {
-                                fit: [110, 110],
+
+                                fit: [
+                                    110,
+                                    110
+                                ],
+
                                 align: "center",
+
                                 valign: "center"
+
                             }
                         );
 
@@ -1800,7 +1874,10 @@ app.get(
 
             }
 
-            // Student details heading
+
+            // =================================
+            // STUDENT DETAILS
+            // =================================
 
             doc
                 .font("Helvetica-Bold")
@@ -1811,10 +1888,14 @@ app.get(
                     startY
                 );
 
+
             doc.moveDown(0.6);
 
-            // Details helper
-            function detail(label, value) {
+
+            function detail(
+                label,
+                value
+            ) {
 
                 doc
                     .font("Helvetica-Bold")
@@ -1829,53 +1910,66 @@ app.get(
                     .text(
                         value || "-"
                     );
+
             }
+
 
             detail(
                 "Name",
                 student.name
             );
 
+
             detail(
                 "Father Name",
                 student.fatherName
             );
+
 
             detail(
                 "Mobile",
                 student.mobile
             );
 
+
             detail(
                 "Email",
                 student.email
             );
 
+
             detail(
                 "Age",
-                String(student.age || "-")
+                String(
+                    student.age || "-"
+                )
             );
+
 
             detail(
                 "Course",
                 student.course
             );
 
+
             detail(
                 "Address",
                 student.address
             );
 
-            // Move below photo
-            doc.y = Math.max(
-                doc.y,
-                startY + 125
-            );
+
+            doc.y =
+                Math.max(
+                    doc.y,
+                    startY + 125
+                );
+
 
             doc.moveDown(0.5);
 
+
             // =================================
-            // PROGRESS SUMMARY
+            // ACADEMIC SUMMARY
             // =================================
 
             doc
@@ -1885,10 +1979,13 @@ app.get(
                     "Academic Summary"
                 );
 
+
             doc.moveDown(0.5);
 
-            // Summary box
-            const summaryY = doc.y;
+
+            const summaryY =
+                doc.y;
+
 
             doc
                 .rect(
@@ -1899,7 +1996,8 @@ app.get(
                 )
                 .stroke();
 
-            // Total exams
+
+            // Total Exams
             doc
                 .font("Helvetica-Bold")
                 .fontSize(11)
@@ -1908,6 +2006,7 @@ app.get(
                     55,
                     summaryY + 12
                 );
+
 
             doc
                 .font("Helvetica")
@@ -1922,7 +2021,8 @@ app.get(
                     summaryY + 32
                 );
 
-            // Total marks
+
+            // Total Marks
             doc
                 .font("Helvetica-Bold")
                 .fontSize(11)
@@ -1932,16 +2032,20 @@ app.get(
                     summaryY + 12
                 );
 
+
             doc
                 .font("Helvetica")
                 .fontSize(13)
                 .text(
-                    String(totalMarks),
+                    String(
+                        result.totalMarks
+                    ),
                     190,
                     summaryY + 32
                 );
 
-            // Obtained marks
+
+            // Obtained Marks
             doc
                 .font("Helvetica-Bold")
                 .fontSize(11)
@@ -1951,35 +2055,79 @@ app.get(
                     summaryY + 12
                 );
 
+
             doc
                 .font("Helvetica")
                 .fontSize(13)
                 .text(
-                    String(obtainedMarks),
+                    String(
+                        result.obtainedMarks
+                    ),
                     320,
                     summaryY + 32
                 );
 
-            // Progress
+
+            // Percentage
             doc
                 .font("Helvetica-Bold")
                 .fontSize(11)
                 .text(
-                    "Progress",
+                    "Percentage",
                     450,
                     summaryY + 12
                 );
+
 
             doc
                 .font("Helvetica")
                 .fontSize(13)
                 .text(
-                    progress + "%",
+                    result.percentage + "%",
                     450,
                     summaryY + 32
                 );
 
-            doc.y = summaryY + 85;
+
+            doc.y =
+                summaryY + 85;
+
+
+            // =================================
+            // RESULT
+            // =================================
+
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(15)
+                .text(
+                    "Result"
+                );
+
+
+            doc.moveDown(0.5);
+
+
+            doc
+                .font("Helvetica")
+                .fontSize(12)
+                .text(
+                    "Overall Result: " +
+                    result.result
+                );
+
+
+            doc
+                .font("Helvetica")
+                .fontSize(12)
+                .text(
+                    "Grade: " +
+                    result.grade
+                );
+
+
+            doc.moveDown(1);
+
 
             // =================================
             // ATTENDANCE SUMMARY
@@ -1988,11 +2136,17 @@ app.get(
             doc
                 .font("Helvetica-Bold")
                 .fontSize(15)
-                .text("Attendance Summary");
+                .text(
+                    "Attendance Summary"
+                );
+
 
             doc.moveDown(0.5);
 
-            const attendanceY = doc.y;
+
+            const attendanceY =
+                doc.y;
+
 
             doc
                 .rect(
@@ -2002,6 +2156,7 @@ app.get(
                     65
                 )
                 .stroke();
+
 
             // Present
             doc
@@ -2013,14 +2168,18 @@ app.get(
                     attendanceY + 12
                 );
 
+
             doc
                 .font("Helvetica")
                 .fontSize(13)
                 .text(
-                    String(attendance.present),
+                    String(
+                        attendance.present
+                    ),
                     55,
                     attendanceY + 32
                 );
+
 
             // Absent
             doc
@@ -2032,14 +2191,18 @@ app.get(
                     attendanceY + 12
                 );
 
+
             doc
                 .font("Helvetica")
                 .fontSize(13)
                 .text(
-                    String(attendance.absent),
+                    String(
+                        attendance.absent
+                    ),
                     180,
                     attendanceY + 32
                 );
+
 
             // Total Days
             doc
@@ -2051,113 +2214,91 @@ app.get(
                     attendanceY + 12
                 );
 
+
             doc
                 .font("Helvetica")
                 .fontSize(13)
                 .text(
-                    String(attendance.total),
+                    String(
+                        attendance.total
+                    ),
                     305,
                     attendanceY + 32
                 );
+
 
             // Attendance %
             doc
                 .font("Helvetica-Bold")
                 .fontSize(11)
                 .text(
-                    "Attendance",
-                    435,
+                    "Attendance %",
+                    430,
                     attendanceY + 12
                 );
+
 
             doc
                 .font("Helvetica")
                 .fontSize(13)
                 .text(
-                    attendance.percentage + "%",
-                    435,
+                    attendance.percentage +
+                    "%",
+                    430,
                     attendanceY + 32
                 );
 
-            doc.y = attendanceY + 85;
+
+            doc.y =
+                attendanceY + 85;
+
 
             // =================================
-            // EXAM RESULTS
+            // EXAM DETAILS
             // =================================
-
-            doc
-                .font("Helvetica-Bold")
-                .fontSize(15)
-                .text(
-                    "Exam Results"
-                );
-
-            doc.moveDown(0.5);
 
             if (
                 student.exams &&
                 student.exams.length > 0
             ) {
 
+                doc
+                    .font("Helvetica-Bold")
+                    .fontSize(15)
+                    .text(
+                        "Exam Details"
+                    );
+
+
+                doc.moveDown(0.5);
+
+
                 student.exams.forEach(
                     (exam) => {
 
-                        // Exam name
+                        // Page break if needed
+                        if (
+                            doc.y > 700
+                        ) {
+
+                            doc.addPage();
+
+                        }
+
+
                         doc
-                            .font("Helvetica-Bold")
+                            .font(
+                                "Helvetica-Bold"
+                            )
                             .fontSize(12)
                             .text(
                                 exam.examName
                             );
 
+
                         doc.moveDown(0.3);
 
-                        // Table header
-                        const tableX = 40;
-                        const subjectWidth = 280;
-                        const marksWidth = 110;
-                        const totalWidth = 125;
 
-                        const rowY = doc.y;
-
-                        doc
-                            .rect(
-                                tableX,
-                                rowY,
-                                515,
-                                25
-                            )
-                            .stroke();
-
-                        doc
-                            .font("Helvetica-Bold")
-                            .fontSize(9)
-                            .text(
-                                "Subject",
-                                tableX + 8,
-                                rowY + 8
-                            );
-
-                        doc.text(
-                            "Obtained",
-                            tableX +
-                            subjectWidth +
-                            8,
-                            rowY + 8
-                        );
-
-                        doc.text(
-                            "Total",
-                            tableX +
-                            subjectWidth +
-                            marksWidth +
-                            8,
-                            rowY + 8
-                        );
-
-                        doc.y = rowY + 25;
-
-                        // Subjects
                         if (
                             exam.subjects &&
                             exam.subjects.length > 0
@@ -2166,88 +2307,55 @@ app.get(
                             exam.subjects.forEach(
                                 (subject) => {
 
-                                    // New page if needed
-                                    if (
-                                        doc.y > 730
-                                    ) {
-
-                                        doc.addPage();
-
-                                        doc
-                                            .font("Helvetica-Bold")
-                                            .fontSize(15)
-                                            .text(
-                                                "Exam Results - Continued"
-                                            );
-
-                                        doc.moveDown();
-
-                                    }
-
-                                    const subjectY =
-                                        doc.y;
-
-                                    doc
-                                        .rect(
-                                            tableX,
-                                            subjectY,
-                                            515,
-                                            24
-                                        )
-                                        .stroke();
-
-                                    doc
-                                        .font("Helvetica")
-                                        .fontSize(9)
-                                        .text(
-                                            subject.subjectName,
-                                            tableX + 8,
-                                            subjectY + 7,
-                                            {
-                                                width:
-                                                    subjectWidth - 15
-                                            }
+                                    const subjectTotal =
+                                        Number(
+                                            subject.totalMarks ||
+                                            0
                                         );
 
-                                    doc.text(
-                                        String(
-                                            subject.obtainedMarks
-                                        ),
-                                        tableX +
-                                        subjectWidth +
-                                        8,
-                                        subjectY + 7
-                                    );
 
-                                    doc.text(
-                                        String(
-                                            subject.totalMarks
-                                        ),
-                                        tableX +
-                                        subjectWidth +
-                                        marksWidth +
-                                        8,
-                                        subjectY + 7
-                                    );
+                                    const subjectObtained =
+                                        Number(
+                                            subject.obtainedMarks ||
+                                            0
+                                        );
 
-                                    doc.y =
-                                        subjectY + 24;
+
+                                    const subjectPercentage =
+                                        subjectTotal > 0
+                                            ? (
+                                                subjectObtained /
+                                                subjectTotal
+                                            ) *
+                                            100
+                                            : 0;
+
+
+                                    doc
+                                        .font(
+                                            "Helvetica"
+                                        )
+                                        .fontSize(10)
+                                        .text(
+                                            subject.subjectName +
+                                            "   " +
+                                            subjectObtained +
+                                            "/" +
+                                            subjectTotal +
+                                            "   " +
+                                            subjectPercentage.toFixed(
+                                                2
+                                            ) +
+                                            "%"
+                                        );
 
                                 }
                             );
 
-                        } else {
-
-                            doc
-                                .font("Helvetica")
-                                .fontSize(9)
-                                .text(
-                                    "No subjects available"
-                                );
-
                         }
 
-                        doc.moveDown(0.8);
+
+                        doc.moveDown(0.6);
 
                     }
                 );
@@ -2258,62 +2366,61 @@ app.get(
                     .font("Helvetica")
                     .fontSize(11)
                     .text(
-                        "No exam results available."
+                        "No exam records available."
                     );
 
             }
+
 
             // =================================
             // FOOTER
             // =================================
 
-            const pages =
-                doc.bufferedPageRange();
+            doc.moveDown(1);
 
-            for (
-                let i = 0;
-                i < pages.count;
-                i++
-            ) {
 
-                doc.switchToPage(
-                    pages.start + i
+            doc
+                .font("Helvetica")
+                .fontSize(9)
+                .text(
+                    "Generated by Student Management System",
+                    {
+                        align: "center"
+                    }
                 );
 
-                doc
-                    .font("Helvetica")
-                    .fontSize(8)
-                    .text(
-                        `Student Report | Page ${i + 1} of ${pages.count}`,
-                        40,
-                        780,
-                        {
-                            align: "center",
-                            width: 515
-                        }
-                    );
-
-            }
 
             doc.end();
+
 
         } catch (error) {
 
             console.log(
-                "Professional PDF Error:",
+                "PDF Error:",
                 error
             );
 
-            res.status(500).send(
-                "Error generating PDF: " +
-                error.message
-            );
+
+            if (!res.headersSent) {
+
+                res
+                    .status(500)
+                    .send(
+                        "Error generating PDF: " +
+                        error.message
+                    );
+
+            }
 
         }
 
     }
 );
 
+
+// ==================================================
+// EDIT STUDENT
+// ==================================================
 
 
 // ===============================
@@ -2360,10 +2467,11 @@ app.get(
             );
 
 
-            res.status(500).send(
-                "Error: " +
-                error.message
-            );
+            res
+                .status(500)
+                .send(
+                    "Error loading edit page"
+                );
 
         }
 
@@ -2372,11 +2480,11 @@ app.get(
 
 
 // ===============================
-// Edit Student
+// Update Student
 // ===============================
 
 app.post(
-    "/students/edit/:id",
+    "/students/update/:id",
     isAuthenticated,
     upload.single("photo"),
     async (req, res) => {
@@ -2393,8 +2501,6 @@ app.post(
 
                 email,
 
-                oldPhoto,
-
                 age,
 
                 course,
@@ -2407,7 +2513,6 @@ app.post(
 
 
             // Basic validation
-
             if (
                 !name ||
                 !fatherName ||
@@ -2425,8 +2530,7 @@ app.post(
             }
 
 
-            // Age
-
+            // Age validation
             if (
                 Number(age) < 1 ||
                 Number(age) > 100
@@ -2439,8 +2543,7 @@ app.post(
             }
 
 
-            // Mobile
-
+            // Mobile validation
             if (
                 !/^[0-9]{10}$/.test(
                     mobile
@@ -2454,9 +2557,9 @@ app.post(
             }
 
 
-            // ===============================
-            // Exams
-            // ===============================
+            // =================================
+            // Format Exams
+            // =================================
 
             let formattedExams = [];
 
@@ -2584,12 +2687,33 @@ app.post(
             }
 
 
-            // ===============================
+            // =================================
+            // Existing Student
+            // =================================
+
+            const student =
+                await Student.findById(
+                    req.params.id
+                );
+
+
+            if (!student) {
+
+                return res
+                    .status(404)
+                    .send(
+                        "Student not found"
+                    );
+
+            }
+
+
+            // =================================
             // Photo
-            // ===============================
+            // =================================
 
             let photoUrl =
-                oldPhoto || "";
+                student.photo || "";
 
 
             if (req.file) {
@@ -2602,73 +2726,66 @@ app.post(
             }
 
 
-            // ===============================
+            // =================================
             // Update
-            // ===============================
+            // =================================
 
-            await Student.findByIdAndUpdate(
+            student.name =
+                name;
 
-                req.params.id,
+            student.fatherName =
+                fatherName;
 
-                {
+            student.mobile =
+                mobile;
 
-                    name,
+            student.email =
+                email;
 
-                    fatherName,
+            student.age =
+                Number(age);
 
-                    mobile,
+            student.course =
+                course;
 
-                    email,
+            student.address =
+                address;
 
-                    photo:
-                        photoUrl,
+            student.photo =
+                photoUrl;
 
-                    age:
-                        Number(age),
+            student.exams =
+                formattedExams;
 
-                    course,
 
-                    address,
-
-                    exams:
-                        formattedExams
-
-                },
-
-                {
-
-                    new: true,
-
-                    runValidators: true
-
-                }
-
-            );
+            await student.save();
 
 
             res.redirect(
-                "/students"
+                "/students/view/" +
+                student._id
             );
 
 
         } catch (error) {
 
             console.log(
-                "Error updating student:",
+                "Update Student Error:",
                 error
             );
 
 
-            res.status(500).send(
-                "Error updating student: " +
-                error.message
-            );
+            res
+                .status(500)
+                .send(
+                    "Error updating student: " +
+                    error.message
+                );
 
         }
 
     }
 );
-
 
 // ==================================================
 // DELETE
@@ -2923,9 +3040,10 @@ app.delete(
     }
 );
 
-// =========================================
+
+// ==================================================
 // ATTENDANCE SYSTEM
-// =========================================
+// ==================================================
 
 
 // =========================================
@@ -2941,7 +3059,10 @@ app.get(
 
             // Today's date
             const today =
-                new Date().toISOString().split("T")[0];
+                new Date()
+                    .toISOString()
+                    .split("T")[0];
+
 
             const selectedDate =
                 req.query.date || today;
@@ -2956,51 +3077,60 @@ app.get(
 
 
             // Check attendance for selected date
-            students.forEach((student) => {
+            students.forEach(
+                (student) => {
 
-                student.todayStatus = "";
-
-
-                if (
-                    student.attendance &&
-                    student.attendance.length > 0
-                ) {
-
-                    const record =
-                        student.attendance.find(
-                            (item) => {
-
-                                const itemDate =
-                                    new Date(item.date)
-                                        .toISOString()
-                                        .split("T")[0];
-
-                                return (
-                                    itemDate ===
-                                    selectedDate
-                                );
-
-                            }
-                        );
+                    student.todayStatus =
+                        "";
 
 
-                    if (record) {
+                    if (
+                        student.attendance &&
+                        student.attendance.length > 0
+                    ) {
 
-                        student.todayStatus =
-                            record.status;
+                        const record =
+                            student.attendance.find(
+                                (item) => {
+
+                                    const itemDate =
+                                        new Date(
+                                            item.date
+                                        )
+                                            .toISOString()
+                                            .split("T")[0];
+
+
+                                    return (
+                                        itemDate ===
+                                        selectedDate
+                                    );
+
+                                }
+                            );
+
+
+                        if (record) {
+
+                            student.todayStatus =
+                                record.status;
+
+                        }
 
                     }
 
                 }
-
-            });
+            );
 
 
             res.render(
                 "attendance",
                 {
+
                     students,
+
                     selectedDate
+
                 }
             );
 
@@ -3038,6 +3168,7 @@ app.post(
             const date =
                 req.body.date;
 
+
             const attendance =
                 req.body.attendance;
 
@@ -3062,11 +3193,11 @@ app.post(
             }
 
 
-            // IMPORTANT:
             // Store date as UTC midnight
             const selectedDate =
                 new Date(
-                    date + "T00:00:00.000Z"
+                    date +
+                    "T00:00:00.000Z"
                 );
 
 
@@ -3090,7 +3221,7 @@ app.post(
                     attendance[studentId];
 
 
-                // Only allow Present / Absent
+                // Only Present / Absent
                 if (
                     status !== "Present" &&
                     status !== "Absent"
@@ -3115,18 +3246,22 @@ app.post(
                 }
 
 
-                // =================================
-                // Check if attendance already exists
-                // =================================
-
+                // Check existing attendance
                 const existingRecord =
                     await Student.findOne({
+
                         _id: studentId,
 
                         "attendance.date": {
-                            $gte: selectedDate,
-                            $lt: nextDate
+
+                            $gte:
+                                selectedDate,
+
+                            $lt:
+                                nextDate
+
                         }
+
                     });
 
 
@@ -3139,19 +3274,31 @@ app.post(
                     await Student.updateOne(
 
                         {
-                            _id: studentId,
+
+                            _id:
+                                studentId,
 
                             "attendance.date": {
-                                $gte: selectedDate,
-                                $lt: nextDate
+
+                                $gte:
+                                    selectedDate,
+
+                                $lt:
+                                    nextDate
+
                             }
+
                         },
 
                         {
+
                             $set: {
+
                                 "attendance.$.status":
                                     status
+
                             }
+
                         }
 
                     );
@@ -3168,11 +3315,16 @@ app.post(
                     await Student.updateOne(
 
                         {
-                            _id: studentId
+
+                            _id:
+                                studentId
+
                         },
 
                         {
+
                             $push: {
+
                                 attendance: {
 
                                     date:
@@ -3182,7 +3334,9 @@ app.post(
                                         status
 
                                 }
+
                             }
+
                         }
 
                     );
@@ -3192,13 +3346,12 @@ app.post(
             }
 
 
-            // =================================
-            // Redirect back
-            // =================================
-
+            // Redirect
             res.redirect(
                 "/attendance?date=" +
-                encodeURIComponent(date)
+                encodeURIComponent(
+                    date
+                )
             );
 
 
@@ -3220,6 +3373,7 @@ app.post(
     }
 );
 
+
 // =========================================
 // ABSENT STUDENTS PANEL
 // =========================================
@@ -3236,6 +3390,7 @@ app.get(
                     .toISOString()
                     .split("T")[0];
 
+
             const selectedDate =
                 req.query.date || today;
 
@@ -3243,29 +3398,47 @@ app.get(
             // Date range
             const startDate =
                 new Date(
-                    selectedDate + "T00:00:00.000Z"
+                    selectedDate +
+                    "T00:00:00.000Z"
                 );
+
 
             const endDate =
                 new Date(
-                    selectedDate + "T23:59:59.999Z"
+                    selectedDate +
+                    "T23:59:59.999Z"
                 );
 
 
-            // Students who are absent
+            // Absent students
             const students =
                 await Student.find({
+
                     attendance: {
+
                         $elemMatch: {
+
                             date: {
-                                $gte: startDate,
-                                $lte: endDate
+
+                                $gte:
+                                    startDate,
+
+                                $lte:
+                                    endDate
+
                             },
-                            status: "Absent"
+
+                            status:
+                                "Absent"
+
                         }
+
                     }
+
                 }).sort({
+
                     name: 1
+
                 });
 
 
@@ -3274,18 +3447,31 @@ app.get(
                 await Student.countDocuments();
 
 
-            // Present count
+            // Present students
             const presentStudents =
                 await Student.countDocuments({
+
                     attendance: {
+
                         $elemMatch: {
+
                             date: {
-                                $gte: startDate,
-                                $lte: endDate
+
+                                $gte:
+                                    startDate,
+
+                                $lte:
+                                    endDate
+
                             },
-                            status: "Present"
+
+                            status:
+                                "Present"
+
                         }
+
                     }
+
                 });
 
 
@@ -3294,15 +3480,20 @@ app.get(
 
 
             // Attendance percentage
-            let attendancePercentage = 0;
+            let attendancePercentage =
+                0;
 
-            if (totalStudents > 0) {
+
+            if (
+                totalStudents > 0
+            ) {
 
                 attendancePercentage =
                     (
                         presentStudents /
                         totalStudents
-                    ) * 100;
+                    ) *
+                    100;
 
             }
 
@@ -3310,13 +3501,22 @@ app.get(
             res.render(
                 "absent-students",
                 {
+
                     students,
+
                     selectedDate,
+
                     totalStudents,
+
                     presentStudents,
+
                     absentStudents,
+
                     attendancePercentage:
-                        attendancePercentage.toFixed(2)
+                        attendancePercentage.toFixed(
+                            2
+                        )
+
                 }
             );
 
@@ -3328,6 +3528,7 @@ app.get(
                 error
             );
 
+
             res.status(500).send(
                 "Error loading absent students: " +
                 error.message
@@ -3338,8 +3539,9 @@ app.get(
     }
 );
 
+
 // ===============================
-// Server
+// SERVER
 // ===============================
 
 const PORT =

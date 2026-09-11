@@ -8769,3 +8769,594 @@ tbody tr {
     }
 
 }
+
+/* =================================
+   RESULT SUMMARY
+================================= */
+
+.result-summary-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 24px;
+    margin-top: 25px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+}
+
+.result-summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.result-summary-header h2 {
+    margin: 0;
+    color: #1e293b;
+}
+
+.result-summary-header p {
+    margin: 5px 0 0;
+    color: #64748b;
+}
+
+.result-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.result-box {
+    padding: 18px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.result-box span {
+    display: block;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.result-box strong {
+    font-size: 25px;
+    color: #0f172a;
+}
+
+.result-badge {
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.result-pass {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.result-fail {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.result-na {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+
+/* DARK MODE */
+
+body.dark-mode .result-summary-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .result-summary-header h2 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .result-summary-header p {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .result-box {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .result-box span {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .result-box strong {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .result-na {
+    background: #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+    .result-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .result-summary-header {
+        align-items: flex-start;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .result-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .result-summary-header {
+        flex-direction: column;
+    }
+
+}
+
+/* =========================================
+   ABSENT STUDENTS PAGE - DARK MODE
+   ========================================= */
+
+body.dark-mode .absent-container {
+    color: #f8fafc;
+}
+
+/* Page Header */
+body.dark-mode .absent-header h1 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .absent-header p {
+    color: #94a3b8 !important;
+}
+
+/* Top Attendance / Students buttons */
+body.dark-mode .attendance-back-btn {
+    color: #93c5fd !important;
+}
+
+body.dark-mode .attendance-back-btn:hover {
+    color: #bfdbfe !important;
+}
+
+
+/* =========================================
+   DATE FORM
+   ========================================= */
+
+body.dark-mode .absent-date-form {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .absent-date-form label {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .absent-date-form input[type="date"] {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+    color-scheme: dark;
+}
+
+body.dark-mode .absent-date-form input[type="date"]:focus {
+    border-color: #6366f1 !important;
+    outline: none;
+}
+
+body.dark-mode .absent-date-form button {
+    color: #ffffff !important;
+}
+
+
+/* =========================================
+   STATISTICS CARDS
+   ========================================= */
+
+body.dark-mode .absent-stat-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-mode .absent-stat-card span {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .absent-stat-card strong {
+    color: #f8fafc !important;
+}
+
+
+/* Present card */
+body.dark-mode .absent-stat-card.present-stat {
+    background: #132e24 !important;
+    border-color: #166534 !important;
+}
+
+body.dark-mode .absent-stat-card.present-stat span {
+    color: #86efac !important;
+}
+
+body.dark-mode .absent-stat-card.present-stat strong {
+    color: #bbf7d0 !important;
+}
+
+
+/* Absent card */
+body.dark-mode .absent-stat-card.absent-stat {
+    background: #351923 !important;
+    border-color: #7f1d1d !important;
+}
+
+body.dark-mode .absent-stat-card.absent-stat span {
+    color: #fda4af !important;
+}
+
+body.dark-mode .absent-stat-card.absent-stat strong {
+    color: #fecdd3 !important;
+}
+
+
+/* =========================================
+   ABSENT STUDENTS MAIN CARD
+   ========================================= */
+
+body.dark-mode .absent-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+
+/* Card heading */
+body.dark-mode .absent-card-title h2 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .absent-card-title span {
+    color: #cbd5e1 !important;
+}
+
+
+/* =========================================
+   ABSENT TABLE
+   ========================================= */
+
+body.dark-mode .absent-table {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .absent-table thead {
+    background: #0f172a !important;
+}
+
+body.dark-mode .absent-table th {
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .absent-table td {
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .absent-table td strong {
+    color: #f8fafc !important;
+}
+
+
+/* Table row */
+body.dark-mode .absent-table tbody tr {
+    background: #1e293b !important;
+}
+
+body.dark-mode .absent-table tbody tr:hover {
+    background: #263449 !important;
+}
+
+
+/* =========================================
+   STUDENT PHOTO
+   ========================================= */
+
+body.dark-mode .absent-no-photo {
+    background: #334155 !important;
+    color: #f8fafc !important;
+}
+
+
+/* =========================================
+   ABSENT BADGE
+   ========================================= */
+
+body.dark-mode .absent-badge {
+    background: #450a0a !important;
+    color: #fca5a5 !important;
+    border-color: #7f1d1d !important;
+}
+
+
+/* =========================================
+   VIEW BUTTON
+   ========================================= */
+
+body.dark-mode .absent-view-btn {
+    color: #93c5fd !important;
+    background: #172554 !important;
+    border-color: #1e40af !important;
+}
+
+body.dark-mode .absent-view-btn:hover {
+    color: #dbeafe !important;
+    background: #1e3a8a !important;
+}
+
+
+/* =========================================
+   NO ABSENT STUDENTS
+   ========================================= */
+
+body.dark-mode .no-absent {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+body.dark-mode .no-absent h3 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .no-absent p {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .no-absent-icon {
+    color: #f8fafc !important;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 768px) {
+
+    body.dark-mode .absent-date-form {
+        background: #1e293b !important;
+    }
+
+    body.dark-mode .absent-stat-card {
+        background: #1e293b !important;
+    }
+
+    body.dark-mode .absent-card {
+        background: #1e293b !important;
+    }
+
+}
+
+/* FINAL ATTENDANCE DARK OVERRIDE */
+
+body.dark-mode .attendance-container>div {
+    color: #f8fafc;
+}
+
+body.dark-mode .attendance-container .attendance-card {
+    background: #1e293b !important;
+}
+
+body.dark-mode .attendance-container table {
+    background: #1e293b !important;
+}
+
+body.dark-mode .attendance-container table thead,
+body.dark-mode .attendance-container table thead tr {
+    background: #0f172a !important;
+}
+
+body.dark-mode .attendance-container table th {
+    color: #cbd5e1 !important;
+    background: #0f172a !important;
+}
+
+body.dark-mode .attendance-container table td {
+    color: #cbd5e1 !important;
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .attendance-container table td strong {
+    color: #f8fafc !important;
+}
+
+/* =========================================
+   ATTENDANCE PAGE - FINAL DARK MODE FIX
+   ========================================= */
+
+/* Main page */
+body.dark-mode .attendance-container {
+    color: #f8fafc !important;
+}
+
+/* Header */
+body.dark-mode .attendance-header h1 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .attendance-header p {
+    color: #94a3b8 !important;
+}
+
+/* Header buttons */
+body.dark-mode .attendance-header .absent-panel-btn {
+    color: #fda4af !important;
+}
+
+body.dark-mode .attendance-header .back-btn {
+    color: #93c5fd !important;
+}
+
+
+/* =========================================
+   DATE SECTION
+   ========================================= */
+
+body.dark-mode .attendance-date {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-mode .date-label label {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .date-label small {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .date-icon {
+    background: #334155 !important;
+}
+
+body.dark-mode .date-input-wrapper input[type="date"] {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+    color-scheme: dark;
+}
+
+
+/* =========================================
+   ATTENDANCE CARD
+   ========================================= */
+
+body.dark-mode .attendance-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+
+/* =========================================
+   ATTENDANCE ROWS
+   ========================================= */
+
+body.dark-mode .attendance-row {
+    background: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #475569 !important;
+}
+
+
+/* TABLE HEADER */
+body.dark-mode .attendance-row.attendance-title {
+    background: #0f172a !important;
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .attendance-title div {
+    color: #cbd5e1 !important;
+}
+
+
+/* Hover */
+body.dark-mode .attendance-row:not(.attendance-title):hover {
+    background: #263449 !important;
+}
+
+
+/* =========================================
+   STUDENT INFORMATION
+   ========================================= */
+
+body.dark-mode .student-info strong {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .student-info small {
+    color: #94a3b8 !important;
+}
+
+
+/* Course text */
+body.dark-mode .attendance-row > div {
+    color: #e2e8f0 !important;
+}
+
+
+/* =========================================
+   STUDENT PHOTO
+   ========================================= */
+
+body.dark-mode .attendance-photo.no-photo {
+    background: #334155 !important;
+    color: #f8fafc !important;
+}
+
+
+/* =========================================
+   PRESENT / ABSENT
+   ========================================= */
+
+body.dark-mode .present-label {
+    color: #4ade80 !important;
+}
+
+body.dark-mode .present-label span {
+    color: #4ade80 !important;
+}
+
+body.dark-mode .absent-label {
+    color: #fb7185 !important;
+}
+
+body.dark-mode .absent-label span {
+    color: #fb7185 !important;
+}
+
+
+/* Radio buttons */
+body.dark-mode .attendance-status input[type="radio"] {
+    accent-color: #6366f1;
+}
+
+
+/* =========================================
+   SAVE ATTENDANCE BUTTON
+   ========================================= */
+
+body.dark-mode .save-attendance-btn {
+    background: #334155 !important;
+    color: #ffffff !important;
+    border-color: #475569 !important;
+}
+
+body.dark-mode .save-attendance-btn:hover {
+    background: #475569 !important;
+    color: #ffffff !important;
+}
+
+
+/* No students */
+body.dark-mode .no-students {
+    color: #94a3b8 !important;
+}
